@@ -5,13 +5,15 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using GommeHDnetForumAPI.Conversation;
+using GommeHDnetForumAPI.Parser;
 
 namespace GommeHDnetForumAPI
 {
     public class Forum
     {
-        private readonly string _username;
-        private readonly string _password;
+        private string _username;
+        private string _password;
         public string BaseUrl => "https://www.gommehd.net/";
         public string ForumUrl => BaseUrl + "forum/";
 
@@ -28,18 +30,27 @@ namespace GommeHDnetForumAPI
         public Forum() : this(null, null) {}
 
         public Forum(string username, string password) {
+            ChangeCredentials(username, password);
+            InitHttpClient();
+        }
+
+        public void ChangeCredentials(string username, string password)
+        {
             _username = username;
             _password = password;
+        }
+
+        public void InitHttpClient()
+        {
             _cookieContainer = new CookieContainer();
-            _httpClientHandler = new HttpClientHandler
-            {
+            _httpClientHandler = new HttpClientHandler {
                 CookieContainer = _cookieContainer,
                 AllowAutoRedirect = true,
                 UseCookies = true,
                 ServerCertificateCustomValidationCallback = (message, certificate2, arg3, arg4) => true,
                 SslProtocols = SslProtocols.Tls12
             };
-            _httpClient = new HttpClient(_httpClientHandler) {BaseAddress = new Uri(BaseUrl)};
+            _httpClient = new HttpClient(_httpClientHandler) { BaseAddress = new Uri(BaseUrl) };
             _httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
             _httpClient.DefaultRequestHeaders.Add("Referer", BaseUrl);
             UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36";
@@ -48,9 +59,10 @@ namespace GommeHDnetForumAPI
 
         public bool HasCredentials() => _username != null && _password != null;
 
-        public async Task<Conversations> GetConversations() => await ConversationsParser.ParseConversationsAsync(this);
+        public async Task<Conversations> GetConversations()
+            => await new ConversationsParser(this).ParseAsync();
 
-        public async Task<HttpResponseMessage> GetBaseForum(bool withLogin = true) 
+        public async Task<HttpResponseMessage> GetBaseForum(bool withLogin = true)
             => await GetHttpResponseMessage("forum", withLogin);
 
         public async Task<HttpResponseMessage> GetHttpResponseMessage(string redirect, bool withLogin = true) {

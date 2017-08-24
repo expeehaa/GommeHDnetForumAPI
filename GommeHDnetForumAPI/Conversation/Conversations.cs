@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace GommeHDnetForumAPI
+namespace GommeHDnetForumAPI.Conversation
 {
     public class Conversations : Collection<ConversationInfo>
     {
