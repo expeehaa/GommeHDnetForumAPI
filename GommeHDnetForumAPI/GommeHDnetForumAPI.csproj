@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <Authors>expeehaa</Authors>
+    <Company>expeehaa</Company>
+    <Description>Gommehd.net Xenforo API for .NET Core</Description>
+    <AssemblyVersion>0.0.1</AssemblyVersion>
+    <Version>0.0.1</Version>
+    <RepositoryUrl>https://github.com/expeehaa/GommeHDnetForumAPI</RepositoryUrl>
+    <RepositoryType />
+    <PackageProjectUrl>https://github.com/expeehaa/GommeHDnetForumAPI</PackageProjectUrl>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

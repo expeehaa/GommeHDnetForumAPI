@@ -1,12 +1,12 @@
-﻿namespace GommeHDnetForumAPI.Conversation
+﻿namespace GommeHDnetForumAPI.DataModels.Entities
 {
     public class ConversationMessage
     {
         public long Id { get; }
-        public string Author { get; }
+        public UserInfo Author { get; }
         public string Content { get; }
 
-        public ConversationMessage(long id, string author, string content)
+        public ConversationMessage(long id, UserInfo author, string content)
         {
             Id = id;
             Author = author;
@@ -15,7 +15,7 @@
 
         public override string ToString()
         {
-            return $"Id: {Id} | MsgAuthor: {Author} | Content: {Content}";
+            return $"Id: {Id} | MsgAuthor: {Author.Username} | Content: {Content}";
         }
     }
 }
