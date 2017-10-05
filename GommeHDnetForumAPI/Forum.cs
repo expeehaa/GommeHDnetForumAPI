@@ -50,6 +50,7 @@ namespace GommeHDnetForumAPI
         private HttpClientHandler _httpClientHandler;
         private HttpClient _httpClient;
 
+        /// <inheritdoc />
         /// <summary>
         /// Constructor without credentials
         /// </summary>
@@ -171,28 +172,37 @@ namespace GommeHDnetForumAPI
         /// <summary>
         /// Create a new conversation
         /// </summary>
-        /// <param name="recipients">Conversation participants as UserCollection</param>
+        /// <param name="participants">Conversation participants as UserCollection</param>
         /// <param name="title">Title of the conversation</param>
         /// <param name="message">First message</param>
+        /// <param name="openInvite">Bool indicating wether participants can invite others or not</param>
         /// <returns>ConversationInfo corresponding to the created conversation.</returns>
-        public async Task<ConversationInfo> CreateConversation(UserCollection recipients, string title, string message)
-            => await CreateConversation((from r in recipients select r.Username).ToArray(), title, message);
+        public async Task<ConversationInfo> CreateConversation(UserCollection participants, string title, string message, bool openInvite = false)
+            => await CreateConversation((from r in participants select r.Username).ToArray(), title, message, openInvite);
 
         /// <summary>
         /// Create a new conversation
         /// </summary>
-        /// <param name="recipients">Conversation participants as string[]</param>
+        /// <param name="participants">Conversation participants as string[]</param>
         /// <param name="title">Title of the conversation</param>
         /// <param name="message">First message</param>
+        /// <param name="openInvite">Bool indicating wether participants can invite others or not</param>
         /// <returns>ConversationInfo corresponding to the created conversation.</returns>
-        public async Task<ConversationInfo> CreateConversation(string[] recipients, string title, string message)
+        public async Task<ConversationInfo> CreateConversation(string[] participants, string title, string message, bool openInvite = false)
         {
             if(!LoggedIn) throw new LoginRequiredException("Log in to create a new conversation!");
+            var h = await GetData("forum/conversations/add");
+            var doc = new HtmlDocument();
+            doc.LoadHtml(await h.Content.ReadAsStringAsync());
+            var xftoken = doc.DocumentNode.SelectSingleNode("//input[@name='_xfToken']").GetAttributeValue("value", "");
+
             var kvlist = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("recipients", string.Join(',', recipients)),
+                new KeyValuePair<string, string>("recipients", string.Join(',', participants)),
                 new KeyValuePair<string, string>("title", title),
-                new KeyValuePair<string, string>("message_html", message)
+                new KeyValuePair<string, string>("message_html", message),
+                new KeyValuePair<string, string>("open_invite", openInvite ? "1" : "0"),
+                new KeyValuePair<string, string>("_xfToken", xftoken)
             };
             var hrm = await PostData("forum/conversations/insert", kvlist);
             Console.WriteLine(await hrm.Content.ReadAsStringAsync());

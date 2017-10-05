@@ -13,9 +13,7 @@
             Content = content;
         }
 
-        public override string ToString()
-        {
-            return $"Id: {Id} | MsgAuthor: {Author.Username} | Content: {Content}";
-        }
+        public override string ToString() 
+            => $"Id: {Id} | MsgAuthor: {Author.Username} | Content: \"{Content}\"";
     }
 }

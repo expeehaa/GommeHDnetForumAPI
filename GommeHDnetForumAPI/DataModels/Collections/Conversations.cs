@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels.Entities;
 
 namespace GommeHDnetForumAPI.DataModels.Collections
@@ -12,5 +13,9 @@ namespace GommeHDnetForumAPI.DataModels.Collections
                 await conversationInfo.DownloadMessagesAsync();
             }
         }
+
+        public Conversations() { }
+        public Conversations(DataModelCollection<ConversationInfo> items) : base(items) { }
+        public Conversations(IEnumerable<ConversationInfo> items) : base(items) { }
     }
 }

@@ -4,7 +4,7 @@
     {
         protected Forum Forum { get; }
 
-        public ForumEntity(Forum forum, long id, ForumRedirectUrlString url) : base(id, url)
+        public ForumEntity(Forum forum, long id, ForumUrlPathString urlPath) : base(id, urlPath)
         {
             Forum = forum;
         }

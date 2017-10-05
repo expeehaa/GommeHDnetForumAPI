@@ -1,20 +1,20 @@
 ﻿namespace GommeHDnetForumAPI.DataModels
 {
-    public class ForumRedirectUrlString
+    public class ForumUrlPathString
     {
         //private static string UrlPattern => "(\\S+)\\/(\\S+)\\/?";
 
         public string RedirectUrl { get; }
 
-        public ForumRedirectUrlString(string url)
+        public ForumUrlPathString(string url)
         {
             //if (Regex.IsMatch(url, UrlPattern))
             //    throw new ArgumentException($"Argument 'url' not matching pattern '{UrlPattern}'!");
             RedirectUrl = url;
         }
 
-        public static implicit operator ForumRedirectUrlString(string url) => new ForumRedirectUrlString(url);
-        public static implicit operator string(ForumRedirectUrlString frust) => frust.RedirectUrl;
+        public static implicit operator ForumUrlPathString(string url) => new ForumUrlPathString(url);
+        public static implicit operator string(ForumUrlPathString frust) => frust.RedirectUrl;
 
         public override string ToString() 
             => RedirectUrl;

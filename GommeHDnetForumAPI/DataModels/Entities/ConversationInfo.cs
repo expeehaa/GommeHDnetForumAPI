@@ -1,6 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels.Collections;
+using GommeHDnetForumAPI.DataModels.Exceptions;
 using GommeHDnetForumAPI.Parser;
+using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.DataModels.Entities
 {
@@ -49,20 +54,44 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         /// <summary>
         /// Downloads all messages in a conversation.
         /// </summary>
-        public async Task DownloadMessagesAsync() => await DownloadMessagesAsync(1);
+        public async Task DownloadMessagesAsync() 
+            => await DownloadMessagesAsync(1);
 
         /// <summary>
         /// Downloads conversation messages in a range of pages.
         /// </summary>
         /// <param name="startPage">First page, starting with 1.</param>
         /// <param name="pageCount">Number of pages. If 0 or less all pages from <paramref name="startPage"/> to last will be downloaded.</param>
-        public async Task DownloadMessagesAsync(int startPage, int pageCount = 0)
-        {
-            Messages = await new ConversationMessageParser(Forum, Url, startPage, pageCount).ParseAsync();
+        public async Task DownloadMessagesAsync(int startPage, int pageCount = 0) 
+            => Messages = await new ConversationMessageParser(Forum, UrlPath, startPage, pageCount).ParseAsync();
+
+        /// <summary>
+        /// Sends a reply to the conversation if possible.
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        /// <returns>bool indicating wether replying was successful or not.</returns>
+        public async Task<bool> Reply(string message) {
+            if (!Forum.LoggedIn) throw new LoginRequiredException("Login required to reply to a conversation.");
+            var h = await Forum.GetData(UrlPath);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(await h.Content.ReadAsStringAsync());
+            var qrnode = doc.GetElementbyId("QuickReply");
+            if (qrnode == null) return false;
+            var xftoken = qrnode.SelectSingleNode(".//input[@name='_xfToken']").GetAttributeValue("value", "");
+            var xfrelativeresolver = qrnode.SelectSingleNode(".//input[@name='_xfRelativeResolver']").GetAttributeValue("value", "");
+
+            var kvlist = new List<KeyValuePair<string, string>> {
+                new KeyValuePair<string, string>("message_html", message),
+                new KeyValuePair<string, string>("_xfToken", xftoken),
+                new KeyValuePair<string, string>("_xfRelativeResolver", xfrelativeresolver)
+            };
+            var hrm = await Forum.PostData(UrlPath + "insert-reply", kvlist, false);
+            var messages = await new ConversationMessageParser(Forum, await hrm.Content.ReadAsStringAsync()).ParseAsync();
+            Messages.Add(messages.Last());
+            return hrm.IsSuccessStatusCode;
         }
 
-        public override string ToString() {
-            return $"Id: {Id} | Title: {Title} | Author: {Author} | Members: ({string.Join(",", Members)}) | Answers: {AnswerCount}";
-        }
+        public override string ToString() 
+            => $"Id: {Id} | Title: \"{Title}\" | Author: \"{Author}\" | Answers: {AnswerCount} | Members: ({Members}) | Messages: ({Messages})";
     }
 }

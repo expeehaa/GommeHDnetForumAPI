@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Entities;
 using GommeHDnetForumAPI.DataModels.Exceptions;
@@ -11,10 +11,9 @@ namespace GommeHDnetForumAPI.Parser
 {
     internal class ConversationsParser : Parser<Conversations>
     {
-        private const string Url = "forum/conversations/";
         private readonly int _startPage, _pageCount;
 
-        public ConversationsParser(Forum forum, int startPage, int pageCount) : base(forum) {
+        public ConversationsParser(Forum forum, int startPage, int pageCount) : base(forum, new ForumUrlPathString("forum/conversations/")) {
             _startPage = startPage < 1 ? 1 : startPage;
             _pageCount = pageCount;
         }
@@ -39,26 +38,20 @@ namespace GommeHDnetForumAPI.Parser
                 doc = new HtmlDocument();
                 doc.LoadHtml(await hrm.Content.ReadAsStringAsync());
                 var nodes = doc.DocumentNode.SelectNodes("//ol[@class='discussionListItems']/li");
-                
-                foreach (var node in nodes)
-                {
-                    if (!Regex.IsMatch(node.Id, "conversation-([0-9]+)"))
-                        continue;
-                    var conId = long.Parse(Regex.Match(node.Id, "conversation-([0-9]+)").Groups[1].Value);
-                    var title = node.SelectSingleNode("div/div/h3/a").InnerText;
-                    var url = "forum/" + node.SelectSingleNode("div/div/h3/a").GetAttributeValue("href", "");
-                    var authorname = node.GetAttributeValue("data-author", "");
-                    var membersBuffer = from mnode in node.SelectNodes("div/div/div/div/a[@class='username']")
-                        let url2 = "forum/" + mnode.GetAttributeValue("href", "")
-                        let id = long.Parse(Regex.Match(url2, ".+\\.([0-9]+)").Groups[1].Value)
-                        select new UserInfo(Forum, id, mnode.InnerText, url2);
-                    var members = new UserCollection();
-                    foreach (var userInfo in membersBuffer)
-                        members.Add(userInfo);
-                    var author = members.First(u => u.Username == authorname);
-                    var answerCount = uint.Parse(node.SelectSingleNode("div/dl[@class='major']/dd").InnerText);
-                    conversations.Add(new ConversationInfo(Forum, conId, title, url, author, members, answerCount));
-                }
+
+                conversations.AddRange(from node in nodes
+                    where Regex.IsMatch(node.Id, "conversation-([0-9]+)")
+                    let conid = long.Parse(Regex.Match(node.Id, "conversation-([0-9]+)").Groups[1].Value)
+                    let contitle = node.SelectSingleNode(".//h3[@class='title']/a").InnerText
+                    let conurl = "forum/" + node.SelectSingleNode(".//h3[@class='title']/a").GetAttributeValue("href", "")
+                    let members = new UserCollection(from mnode in node.SelectNodes(".//div[@class='secondRow']/div/a[@class='username']")
+                        let murl = "forum/" + mnode.GetAttributeValue("href", "")
+                        let mid = long.Parse(Regex.Match(murl, ".+\\.([0-9]+)").Groups[1].Value)
+                        select new UserInfo(Forum, mid, mnode.InnerText))
+                    let conauthorname = node.GetAttributeValue("data-author", "")
+                    let conauthor = members.First(m => m.Username == conauthorname)
+                    let conanswers = uint.Parse(node.SelectSingleNode("div/dl[@class='major']/dd").InnerText)
+                    select new ConversationInfo(Forum, conid, contitle, conurl, conauthor, members, conanswers));
             }
 
             return conversations;

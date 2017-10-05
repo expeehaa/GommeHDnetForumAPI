@@ -3,15 +3,15 @@
     public class Entity
     {
         public long Id { get; }
-        public ForumRedirectUrlString Url { get; }
+        public ForumUrlPathString UrlPath { get; }
 
-        public Entity(long id, ForumRedirectUrlString url)
+        public Entity(long id, ForumUrlPathString urlPath)
         {
             Id = id;
-            Url = url;
+            UrlPath = urlPath;
         }
 
         public override string ToString() 
-            => $"Id: {Id}, Url: \"{Url}\"";
+            => $"Id: {Id}, Url: \"{UrlPath}\"";
     }
 }

@@ -6,43 +6,34 @@ namespace GommeHDnetForumAPI.DataModels.Entities
 {
     public class UserInfo : ForumEntity
     {
-        public string Username { get; }
+        public string Username { get; private set; }
         public string AvatarUrl { get; private set; }
         public DateTime? TimeRegistered { get; private set; }
         public int? PostCount { get; private set; }
         public int? LikeCount { get; private set; }
         public string Location { get; private set; }
         public string Status { get; private set; }
-        public Gender Gender { get; private set; }
-        
-        /// <summary>
-        /// Internal base Constructor
-        /// </summary>
-        internal UserInfo(Forum forum, long id, string username, string url) : this(forum, id, username, url, null, null, null, null, null, null, Gender.Unknown)
-        {
-        }
+        public Gender Gender { get; private set; } = Gender.Unknown;
 
         /// <summary>
-        /// Internal extended constructor
+        /// Internal constructor
         /// </summary>
-        internal UserInfo(Forum forum, long id, string username, string url, string avatarUrl, DateTime? timeRegistered, int? postCount, int? likeCount, string location, string status, Gender gender) : base(forum, id, url)
-        {
+        /// <param name="forum">Forum instance</param>
+        /// <param name="id">User ID</param>
+        internal UserInfo(Forum forum, long id) : base(forum, id, new ForumUrlPathString(Forum.ForumUrl + "members/" + id)) {
+        }
+
+        internal UserInfo(Forum forum, long id, string username) : base(forum, id, new ForumUrlPathString(Forum.ForumUrl + "members/" + id)) {
             Username = username;
-            AvatarUrl = avatarUrl;
-            TimeRegistered = timeRegistered;
-            PostCount = postCount;
-            LikeCount = likeCount;
-            Location = location;
-            Status = status;
-            Gender = gender;
         }
 
         /// <summary>
-        /// Downloads extended user data
+        /// Downloads available user data
         /// </summary>
         public async Task DownloadDataAsync()
         {
-            var nInfo = await new UserInfoParser(Forum, this).ParseAsync();
+            var nInfo = await new UserInfoParser(Forum, Id).ParseAsync();
+            Username = nInfo.Username;
             AvatarUrl = nInfo.AvatarUrl;
             TimeRegistered = nInfo.TimeRegistered;
             PostCount = nInfo.PostCount;
@@ -51,5 +42,8 @@ namespace GommeHDnetForumAPI.DataModels.Entities
             Status = nInfo.Status;
             Gender = nInfo.Gender;
         }
+
+        public override string ToString() 
+            => $"Id: {Id}{(string.IsNullOrWhiteSpace(Username) ? "" : $" | Username: \"{Username}\"")}";
     }
 }
