@@ -43,7 +43,7 @@ namespace GommeHDnetForumAPI.Parser
                     where Regex.IsMatch(node.Id, "conversation-([0-9]+)")
                     let conid = long.Parse(Regex.Match(node.Id, "conversation-([0-9]+)").Groups[1].Value)
                     let contitle = node.SelectSingleNode(".//h3[@class='title']/a").InnerText
-                    let conurl = "forum/" + node.SelectSingleNode(".//h3[@class='title']/a").GetAttributeValue("href", "")
+                    let conurl = $"forum/conversations/{conid}/"
                     let members = new UserCollection(from mnode in node.SelectNodes(".//div[@class='secondRow']/div/a[@class='username']")
                         let murl = "forum/" + mnode.GetAttributeValue("href", "")
                         let mid = long.Parse(Regex.Match(murl, ".+\\.([0-9]+)").Groups[1].Value)
