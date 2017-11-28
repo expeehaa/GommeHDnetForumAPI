@@ -26,8 +26,8 @@ namespace GommeHDnetForumAPI.Parser
             var htmldata = Html;
             if (string.IsNullOrWhiteSpace(Html)) {
                 if (!Forum.LoggedIn) throw new LoginRequiredException("Getting conversation messages needs login!");
-                var hrm = await Forum.GetData(Url);
-                htmldata = await hrm.Content.ReadAsStringAsync();
+                var hrm = await Forum.GetData(Url).ConfigureAwait(false);
+                htmldata = await hrm.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
             var doc = new HtmlDocument();
             doc.LoadHtml(htmldata);
@@ -39,9 +39,9 @@ namespace GommeHDnetForumAPI.Parser
                 var pageMax = _pageCount <= 0 ? pages : (_startPage + _pageCount - 1 >= pages ? pages : _startPage + _pageCount - 1);
 
                 for (var i = _startPage; i <= pageMax; i++) {
-                    var hrm = await Forum.GetData(Url + "page-" + i);
+                    var hrm = await Forum.GetData(Url + "page-" + i).ConfigureAwait(false);
                     doc = new HtmlDocument();
-                    doc.LoadHtml(await hrm.Content.ReadAsStringAsync());
+                    doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
                     messages.AddRange(ParseMessages(doc.DocumentNode.SelectNodes("//ol[@id='messageList']/li")));
                 }
             }

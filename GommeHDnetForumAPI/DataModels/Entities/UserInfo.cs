@@ -6,15 +6,16 @@ namespace GommeHDnetForumAPI.DataModels.Entities
 {
     public class UserInfo : ForumEntity
     {
-        public string Username { get; private set; }
-        public string AvatarUrl { get; private set; }
-        public DateTime? TimeRegistered { get; private set; }
-        public int? PostCount { get; private set; }
-        public int? LikeCount { get; private set; }
-        public string Location { get; private set; }
-        public string Status { get; private set; }
-        public Gender Gender { get; private set; } = Gender.Unknown;
-        public bool? Verified { get; private set; }
+        public string Username { get; internal set; }
+        public string AvatarUrl { get; internal set; }
+        public DateTime? TimeRegistered { get; internal set; }
+        public int? PostCount { get; internal set; }
+        public int? LikeCount { get; internal set; }
+        public string Location { get; internal set; }
+        public string Status { get; internal set; }
+        public Gender Gender { get; internal set; } = Gender.Unknown;
+        public bool? Verified { get; internal set; }
+        public int? Trophies { get; internal set; }
 
         /// <summary>
         /// Internal constructor
@@ -33,7 +34,8 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         /// </summary>
         public async Task DownloadDataAsync()
         {
-            var nInfo = await new UserInfoParser(Forum, Id).ParseAsync();
+            var nInfo = await new UserInfoParser(Forum, Id).ParseAsync().ConfigureAwait(false);
+            if (nInfo == null) return;
             Username = nInfo.Username;
             AvatarUrl = nInfo.AvatarUrl;
             TimeRegistered = nInfo.TimeRegistered;
@@ -43,6 +45,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
             Status = nInfo.Status;
             Gender = nInfo.Gender;
             Verified = nInfo.Verified;
+            Trophies = nInfo.Trophies;
         }
 
         public override string ToString() 

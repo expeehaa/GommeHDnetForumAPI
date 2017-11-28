@@ -10,7 +10,7 @@ namespace GommeHDnetForumAPI.DataModels.Collections
         {
             foreach (var conversationInfo in Items)
             {
-                await conversationInfo.DownloadMessagesAsync();
+                await conversationInfo.DownloadMessagesAsync().ConfigureAwait(false);
             }
         }
 

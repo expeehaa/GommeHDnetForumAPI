@@ -10,7 +10,7 @@ namespace GommeHDnetForumAPI.DataModels.Collections
         {
             foreach (var userInfo in Items)
             {
-                await userInfo.DownloadDataAsync();
+                await userInfo.DownloadDataAsync().ConfigureAwait(false);
             }
         }
 

@@ -55,7 +55,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         /// Downloads all messages in a conversation.
         /// </summary>
         public async Task DownloadMessagesAsync() 
-            => await DownloadMessagesAsync(1);
+            => await DownloadMessagesAsync(1).ConfigureAwait(false);
 
         /// <summary>
         /// Downloads conversation messages in a range of pages.
@@ -63,7 +63,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         /// <param name="startPage">First page, starting with 1.</param>
         /// <param name="pageCount">Number of pages. If 0 or less all pages from <paramref name="startPage"/> to last will be downloaded.</param>
         public async Task DownloadMessagesAsync(int startPage, int pageCount = 0) 
-            => Messages = await new ConversationMessageParser(Forum, UrlPath, startPage, pageCount).ParseAsync();
+            => Messages = await new ConversationMessageParser(Forum, UrlPath, startPage, pageCount).ParseAsync().ConfigureAwait(false);
 
         /// <summary>
         /// Sends a reply to the conversation if possible.
@@ -72,9 +72,9 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         /// <returns>bool indicating wether replying was successful or not.</returns>
         public async Task<bool> Reply(string message) {
             if (!Forum.LoggedIn) throw new LoginRequiredException("Login required to reply to a conversation.");
-            var h = await Forum.GetData(UrlPath);
+            var h = await Forum.GetData(UrlPath).ConfigureAwait(false);
             var doc = new HtmlDocument();
-            doc.LoadHtml(await h.Content.ReadAsStringAsync());
+            doc.LoadHtml(await h.Content.ReadAsStringAsync().ConfigureAwait(false));
             var qrnode = doc.GetElementbyId("QuickReply");
             if (qrnode == null) return false;
             var xftoken = qrnode.SelectSingleNode(".//input[@name='_xfToken']").GetAttributeValue("value", "");
@@ -85,8 +85,8 @@ namespace GommeHDnetForumAPI.DataModels.Entities
                 new KeyValuePair<string, string>("_xfToken", xftoken),
                 new KeyValuePair<string, string>("_xfRelativeResolver", xfrelativeresolver)
             };
-            var hrm = await Forum.PostData(UrlPath + "insert-reply", kvlist, false);
-            var messages = await new ConversationMessageParser(Forum, await hrm.Content.ReadAsStringAsync()).ParseAsync();
+            var hrm = await Forum.PostData(UrlPath + "insert-reply", kvlist, false).ConfigureAwait(false);
+            var messages = await new ConversationMessageParser(Forum, await hrm.Content.ReadAsStringAsync()).ParseAsync().ConfigureAwait(false);
             Messages.Add(messages.Last());
             return hrm.IsSuccessStatusCode;
         }

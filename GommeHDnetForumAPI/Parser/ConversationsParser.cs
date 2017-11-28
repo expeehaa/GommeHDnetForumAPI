@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
@@ -21,10 +22,10 @@ namespace GommeHDnetForumAPI.Parser
         public override async Task<Conversations> ParseAsync()
         {
             if(!Forum.LoggedIn) throw new LoginRequiredException("Getting conversations needs login!");
-
-            var hrm = await Forum.GetData(Url);
+            Console.WriteLine($"cons Url: {Url}");
+            var hrm = await Forum.GetData(Url).ConfigureAwait(false);
             var doc = new HtmlDocument();
-            doc.LoadHtml(await hrm.Content.ReadAsStringAsync());
+            doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
 
             var pages = doc.DocumentNode.SelectSingleNode("//div[@class='PageNav']")?.GetAttributeValue("data-last", 0) ?? 1;
 
@@ -36,7 +37,7 @@ namespace GommeHDnetForumAPI.Parser
             for (var i = _startPage; i <= pageMax; i++) {
                 hrm = await Forum.GetData(Url + "?page=" + i);
                 doc = new HtmlDocument();
-                doc.LoadHtml(await hrm.Content.ReadAsStringAsync());
+                doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
                 var nodes = doc.DocumentNode.SelectNodes("//ol[@class='discussionListItems']/li");
 
                 conversations.AddRange(from node in nodes

@@ -31,8 +31,8 @@ namespace GommeHDnetForumAPI.Parser
             if (string.IsNullOrWhiteSpace(Html)) {
                 if (!Forum.LoggedIn) throw new LoginRequiredException();
 
-                var hrm = await Forum.GetData(Url);
-                con = await hrm.Content.ReadAsStringAsync();
+                var hrm = await Forum.GetData(Url).ConfigureAwait(false);
+                con = await hrm.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
 
             var doc = new HtmlDocument();
@@ -48,7 +48,7 @@ namespace GommeHDnetForumAPI.Parser
             var title = container.SelectSingleNode("//div[@class='titleBar']/h1").InnerText;
             var url = string.Join("/", idstrar.Except(new List<string> { idstrar[idstrar.Length - 1] }));
 
-            var messages = await new ConversationMessageParser(Forum, con).ParseAsync();
+            var messages = await new ConversationMessageParser(Forum, con).ParseAsync().ConfigureAwait(false);
             if (!messages.Any()) return null;
             var author = messages[0].Author;
             var recipients = new UserCollection(from li in container.SelectNodes("//ul[@id='ConversationRecipients']/li")
