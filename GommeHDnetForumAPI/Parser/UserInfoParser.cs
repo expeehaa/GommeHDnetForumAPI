@@ -38,7 +38,7 @@ namespace GommeHDnetForumAPI.Parser
             var userId = doc.GetElementbyId("get-premium").GetAttributeValue("data-user-id", 0);
             var username = profilePage.SelectSingleNode(".//h1[@class='username']").InnerText;
             var avatarUrl = profilePage.SelectSingleNode(".//div[@class='avatarScaler']/img").GetAttributeValue("src", "");
-            var status = doc.GetElementbyId("UserStatus")?.InnerText;
+            var status = doc.GetElementbyId("UserStatus")?.FirstChild.InnerText;
             var infoNodes = profilePage.SelectNodes(".//div[@class='section infoBlock']/div/dl/dd");
             if (infoNodes.Count < 5) throw new NodeNotFoundException("Some info section nodes are missing!");
             var posts = int.Parse(infoNodes.ElementAt(2).InnerText);

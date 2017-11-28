@@ -135,7 +135,7 @@ namespace GommeHDnetForumAPI
             if (!response.IsSuccessStatusCode) return false;
             var html = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             doc.LoadHtml(html);
-            var urlpath = new ForumUrlPathString("forum/" + doc.DocumentNode.SelectSingleNode("//div[@class='userbar']//a[@class='btn btn-link profile']").GetAttributeValue("href", ""));
+            var urlpath = new ForumUrlPathString(doc.DocumentNode.SelectSingleNode("//div[@class='userbar']//a[@class='btn btn-link profile']").GetAttributeValue("href", ""));
             SelfUser = await new UserInfoParser(this, urlpath, true).ParseAsync().ConfigureAwait(false);
             return true;
         }
