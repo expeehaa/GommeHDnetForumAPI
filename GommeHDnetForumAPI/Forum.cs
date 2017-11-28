@@ -76,8 +76,7 @@ namespace GommeHDnetForumAPI
             _username = username;
             _password = password;
             ResetCookies();
-            // ReSharper disable once SimplifyConditionalTernaryExpression
-            LoggedIn = !HasCredentials ? false : await Login();
+            LoggedIn = HasCredentials && await Login();
             return LoggedIn;
         }
 
@@ -97,6 +96,7 @@ namespace GommeHDnetForumAPI
             _httpClient = new HttpClient(_httpClientHandler) { BaseAddress = new Uri(BaseUrl) };
             _httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
             _httpClient.DefaultRequestHeaders.Add("Referer", BaseUrl);
+            _httpClient.Timeout = TimeSpan.FromMinutes(1);
             UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36";
         }
 
@@ -179,6 +179,24 @@ namespace GommeHDnetForumAPI
         /// <returns>ConversationInfo corresponding to the created conversation.</returns>
         public async Task<ConversationInfo> CreateConversation(UserCollection participants, string title, string message, bool openInvite = false)
             => await CreateConversation((from r in participants select r.Username).ToArray(), title, message, openInvite);
+
+        /// <summary>
+        /// Returns an Url as a string to create a new conversation with the given <paramref name="participants"/> in a browser window.
+        /// </summary>
+        /// <param name="participants">Conversation participants as UserCollection</param>
+        /// <returns>string containing the Url to creat a conversation.</returns>
+        public string GetConversationCreationUrl(UserCollection participants) {
+            return ForumUrl + "conversations/add?to=" + participants.Aggregate("", (s, u) => $"{s}{u.Username},", s => s.Length > 0 ? s.Substring(0, s.Length - 1) : s);
+        }
+
+        /// <summary>
+        /// Returns an Url as a string to create a new conversation with the given <paramref name="participants"/> in a browser window.
+        /// </summary>
+        /// <param name="participants">Conversation participants as string[]</param>
+        /// <returns>string containing the Url to creat a conversation.</returns>
+        public string GetConversationCreationUrl(string[] participants) {
+            return ForumUrl + "conversations/add?to=" + participants.Aggregate("", (s, u) => $"{s}{u},", s => s.Length > 0 ? s.Substring(0, s.Length - 1) : s);
+        }
 
         /// <summary>
         /// Create a new conversation

@@ -14,6 +14,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         public string Location { get; private set; }
         public string Status { get; private set; }
         public Gender Gender { get; private set; } = Gender.Unknown;
+        public bool? Verified { get; private set; }
 
         /// <summary>
         /// Internal constructor
@@ -41,6 +42,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
             Location = nInfo.Location;
             Status = nInfo.Status;
             Gender = nInfo.Gender;
+            Verified = nInfo.Verified;
         }
 
         public override string ToString() 
