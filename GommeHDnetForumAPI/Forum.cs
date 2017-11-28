@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Entities;
 using GommeHDnetForumAPI.DataModels.Exceptions;
@@ -23,10 +24,16 @@ namespace GommeHDnetForumAPI
         /// True, if neither username nor password are null, empty or whitespace.
         /// </summary>
         public bool HasCredentials => !string.IsNullOrWhiteSpace(_username) && !string.IsNullOrWhiteSpace(_password);
+
         /// <summary>
         /// True if login was successfull.
         /// </summary>
-        public bool LoggedIn;
+        public bool LoggedIn => SelfUser != null;
+
+        /// <summary>
+        /// UserInfo instance of the logged in user.
+        /// </summary>
+        public UserInfo SelfUser { get; private set; }
 
         /// <summary>
         /// Base URL equals to https://www.gommehd.net/
@@ -76,8 +83,8 @@ namespace GommeHDnetForumAPI
             _username = username;
             _password = password;
             ResetCookies();
-            LoggedIn = HasCredentials && await Login().ConfigureAwait(false);
-            return LoggedIn;
+            if(HasCredentials) return await Login().ConfigureAwait(false);
+            return false;
         }
 
         /// <summary>
@@ -125,7 +132,12 @@ namespace GommeHDnetForumAPI
             var fuec = new FormUrlEncodedContent(list);
             fuec.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
             var response = await _httpClient.PostAsync(BaseUrl + "login", fuec).ConfigureAwait(false);
-            return response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode) return false;
+            var html = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            doc.LoadHtml(html);
+            var urlpath = new ForumUrlPathString("forum/" + doc.DocumentNode.SelectSingleNode("//div[@class='userbar']//a[@class='btn btn-link profile']").GetAttributeValue("href", ""));
+            SelfUser = await new UserInfoParser(this, urlpath, true).ParseAsync().ConfigureAwait(false);
+            return true;
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Entities;
@@ -10,6 +9,12 @@ namespace GommeHDnetForumAPI.Parser
 {
     internal class UserInfoParser : Parser<UserInfo>
     {
+        private readonly bool _ignoreLoginCheck;
+
+        public UserInfoParser(Forum forum, ForumUrlPathString urlpath, bool ignoreLoginCheck = false) : base(forum, urlpath) {
+            _ignoreLoginCheck = ignoreLoginCheck;
+        }
+
         public UserInfoParser(Forum forum, long userId) : base(forum, new ForumUrlPathString("forum/members/" + userId)) {
         }
 
@@ -21,7 +26,7 @@ namespace GommeHDnetForumAPI.Parser
             var htmldata = Html;
             if (string.IsNullOrWhiteSpace(Html))
             {
-                if (!Forum.LoggedIn) throw new LoginRequiredException("Getting conversation messages needs login!");
+                if (!Forum.LoggedIn && !_ignoreLoginCheck) throw new LoginRequiredException("Getting conversation messages needs login!");
                 var hrm = await Forum.GetData(Url, false);
                 if (!hrm.IsSuccessStatusCode) return null;
                 htmldata = await hrm.Content.ReadAsStringAsync().ConfigureAwait(false);
