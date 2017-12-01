@@ -241,8 +241,14 @@ namespace GommeHDnetForumAPI
         /// </summary>
         /// <param name="userId">The ID of the user</param>
         /// <returns>Corresponding UserInfo object to the <paramref name="userId"/> or null.</returns>
-        public async Task<UserInfo> GetUserInfo(long userId)
-            => await new UserInfoParser(this, userId).ParseAsync().ConfigureAwait(false);
+        public async Task<UserInfo> GetUserInfo(long userId) {
+            try {
+                return await new UserInfoParser(this, userId).ParseAsync().ConfigureAwait(false);
+            }
+            catch (Exception) {
+                return null;
+            }
+        }
 
         public async Task<UserInfo> GetUserInfo(string username) {
             var h = await GetData("forum/members/").ConfigureAwait(false);
@@ -255,7 +261,12 @@ namespace GommeHDnetForumAPI
                 new KeyValuePair<string, string>("_xfToken", xftoken)
             }, false).ConfigureAwait(false);
             if (!hrm.IsSuccessStatusCode) return null;
-            return await new UserInfoParser(this, await hrm.Content.ReadAsStringAsync().ConfigureAwait(false)).ParseAsync().ConfigureAwait(false);
+            try {
+                return await new UserInfoParser(this, await hrm.Content.ReadAsStringAsync().ConfigureAwait(false)).ParseAsync().ConfigureAwait(false);
+            }
+            catch (Exception) {
+                return null;
+            }
         }
     }
 }
