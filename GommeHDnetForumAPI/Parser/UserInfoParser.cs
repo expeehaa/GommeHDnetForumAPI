@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Entities;
@@ -30,6 +31,8 @@ namespace GommeHDnetForumAPI.Parser
             {
                 if (!Forum.LoggedIn && !_ignoreLoginCheck) throw new LoginRequiredException("Getting conversation messages needs login!");
                 var hrm = await Forum.GetData(Url, false);
+                if (hrm.StatusCode == HttpStatusCode.Forbidden) throw new UserProfileAccessException();
+                if (hrm.StatusCode == HttpStatusCode.NotFound) throw new UserNotFoundException();
                 if (!hrm.IsSuccessStatusCode) return null;
                 htmldata = await hrm.Content.ReadAsStringAsync().ConfigureAwait(false);
             }

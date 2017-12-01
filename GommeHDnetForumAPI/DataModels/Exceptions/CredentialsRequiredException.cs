@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace GommeHDnetForumAPI.DataModels.Exceptions
 {
@@ -13,6 +14,10 @@ namespace GommeHDnetForumAPI.DataModels.Exceptions
         }
 
         public CredentialsRequiredException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected CredentialsRequiredException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
