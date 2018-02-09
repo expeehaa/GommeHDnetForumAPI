@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using CloudFlareUtilities;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Entities;
@@ -55,6 +56,7 @@ namespace GommeHDnetForumAPI
 
         private CookieContainer _cookieContainer;
         private HttpClientHandler _httpClientHandler;
+        private ClearanceHandler _clearanceHandler;
         private HttpClient _httpClient;
 
         /// <inheritdoc />
@@ -100,7 +102,10 @@ namespace GommeHDnetForumAPI
                 ServerCertificateCustomValidationCallback = (message, certificate2, arg3, arg4) => true,
                 SslProtocols = SslProtocols.Tls12
             };
-            _httpClient = new HttpClient(_httpClientHandler) { BaseAddress = new Uri(BaseUrl) };
+            _clearanceHandler = new ClearanceHandler(_httpClientHandler) {
+                MaxRetries = 3
+            };
+            _httpClient = new HttpClient(_clearanceHandler) { BaseAddress = new Uri(BaseUrl) };
             _httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
             _httpClient.DefaultRequestHeaders.Add("Referer", BaseUrl);
             _httpClient.Timeout = TimeSpan.FromMinutes(1);
@@ -132,7 +137,15 @@ namespace GommeHDnetForumAPI
             var fuec = new FormUrlEncodedContent(list);
             fuec.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
             var response = await _httpClient.PostAsync(BaseUrl + "login", fuec).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode) return false;
+            if (response.StatusCode == HttpStatusCode.ServiceUnavailable) {
+                var msg = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                doc.LoadHtml(msg);
+                var form = doc.GetElementbyId("challenge-form");
+
+            }
+            if (!response.IsSuccessStatusCode) {
+                return false;
+            }
             var html = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             doc.LoadHtml(html);
             var urlpath = new ForumUrlPathString(doc.DocumentNode.SelectSingleNode("//div[@class='userbar']//a[@class='btn btn-link profile']").GetAttributeValue("href", ""));

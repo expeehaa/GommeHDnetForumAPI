@@ -43,7 +43,7 @@ namespace GommeHDnetForumAPI.Parser
             var userId = doc.GetElementbyId("get-premium").GetAttributeValue("data-user-id", 0);
             var username = profilePage.SelectSingleNode(".//h1[@class='username']").InnerText.Trim();
             var avatarUrl = profilePage.SelectSingleNode(".//div[@class='avatarScaler']/img").GetAttributeValue("src", "");
-            var status = WebUtility.HtmlDecode(doc.GetElementbyId("UserStatus")?.FirstChild.InnerText.Trim());
+            var status = WebUtility.HtmlDecode(doc.GetElementbyId("UserStatus")?.FirstChild.InnerText.Trim() ?? "");
             var infoNodes = profilePage.SelectNodes(".//div[@class='section infoBlock']//dl");
             var infos = (from node in infoNodes
                 where node.FirstChild.Name.Equals("dt", StringComparison.OrdinalIgnoreCase) && node.LastChild.Name.Equals("dd", StringComparison.OrdinalIgnoreCase)
@@ -51,7 +51,7 @@ namespace GommeHDnetForumAPI.Parser
             var gotPosts = int.TryParse(infos.FirstOrDefault(p => p.Key.ToLower().Contains("beiträge")).Value?.InnerText.Replace(".", ""), out var posts);
             var gotLikes = int.TryParse(infos.FirstOrDefault(p => p.Key.ToLower().Contains("zustimmungen")).Value?.InnerText.Replace(".", ""), out var likes);
             var gotTrophies = int.TryParse(infos.FirstOrDefault(p => p.Key.ToLower().Contains("erfolge")).Value?.InnerText.Replace(".", ""), out var trophies);
-            var location = WebUtility.HtmlDecode(infos.FirstOrDefault(p => p.Key.ToLower().Contains("ort")).Value?.FirstChild?.InnerText.Trim());
+            var location = WebUtility.HtmlDecode(infos.FirstOrDefault(p => p.Key.ToLower().Contains("ort")).Value?.FirstChild?.InnerText.Trim() ?? "");
             var gender = GenderParser.Parse(infos.FirstOrDefault(p => p.Value.GetAttributeValue("itemprop", "").Equals("gender", StringComparison.OrdinalIgnoreCase)).Value?.InnerText);
             var verified = doc.GetElementbyId("statistic").SelectSingleNode("./div[@class='']/div[@class='stat-table']") == null;
 
