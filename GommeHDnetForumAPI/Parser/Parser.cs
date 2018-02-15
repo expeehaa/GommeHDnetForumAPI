@@ -1,35 +1,48 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
+using GommeHDnetForumAPI.DataModels.Exceptions;
+using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser
 {
     internal abstract class Parser<T>
     {
-        protected Forum Forum;
-        protected string Html;
-        protected ForumUrlPathString Url;
+        protected Forum Forum { get; }
+        protected string Html { get; }
+        protected BasicUrl Url { get; }
+        protected HttpResponseMessage HttpResponse { get; }
+        protected ParserContent Content { get; } = ParserContent.None;
 
         protected Parser(Forum forum) {
             Forum = forum;
-            Url = null;
-            Html = null;
         }
 
-        protected Parser(Forum forum, ForumUrlPathString url)
-        {
-            Forum = forum;
-            Url = url;
-            Html = null;
-        }
-
-        protected Parser(Forum forum, string html) {
-            Forum = forum;
-            Url = null;
-            if(string.IsNullOrWhiteSpace(html)) throw new ArgumentNullException(nameof(html));
+        protected Parser(Forum forum, string html) : this(forum) {
             Html = html;
+            Content = ParserContent.Html;
+        }
+
+        protected Parser(Forum forum, BasicUrl url) : this(forum) {
+            Url = url;
+            Content = ParserContent.Url;
+        }
+
+        protected Parser(Forum forum, HttpResponseMessage hrm) : this(forum) {
+            HttpResponse = hrm;
+            Content = ParserContent.HttpResponseMessage;
         }
 
         public abstract Task<T> ParseAsync();
+
+        protected async Task<HtmlDocument> GetDoc(bool loginRequired = true, Action<HttpResponseMessage> onResponse = null) {
+            if (!Forum.LoggedIn && loginRequired) throw new LoginRequiredException("Login required!");
+            var hrm = await Forum.GetData(Url.Url).ConfigureAwait(false);
+            onResponse?.Invoke(hrm);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
+            return doc;
+        }
     }
 }

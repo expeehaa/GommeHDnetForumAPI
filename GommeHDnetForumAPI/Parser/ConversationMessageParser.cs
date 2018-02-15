@@ -11,9 +11,17 @@ namespace GommeHDnetForumAPI.Parser
 {
     internal class ConversationMessageParser : Parser<ConversationMessages>
     {
-        private readonly int _startPage, _pageCount;
+        /// <summary>
+        /// Start page for parser
+        /// </summary>
+        private readonly int _startPage;
 
-        public ConversationMessageParser(Forum forum, ForumUrlPathString url, int startPage, int pageCount) : base(forum, url) {
+        /// <summary>
+        /// Page count
+        /// </summary>
+        private readonly int _pageCount;
+
+        public ConversationMessageParser(Forum forum, BasicUrl url, int startPage, int pageCount) : base(forum, url) {
             _startPage = startPage;
             _pageCount = pageCount;
         }
@@ -23,17 +31,27 @@ namespace GommeHDnetForumAPI.Parser
         }
 
         public override async Task<ConversationMessages> ParseAsync() {
-            var htmldata = Html;
-            if (string.IsNullOrWhiteSpace(Html)) {
-                if (!Forum.LoggedIn) throw new LoginRequiredException("Getting conversation messages needs login!");
-                var hrm = await Forum.GetData(Url).ConfigureAwait(false);
-                htmldata = await hrm.Content.ReadAsStringAsync().ConfigureAwait(false);
+            HtmlDocument doc;
+            switch (Content)
+            {
+                case ParserContent.Html:
+                    doc = new HtmlDocument();
+                    doc.LoadHtml(Html);
+                    break;
+                case ParserContent.Url:
+                    doc = await GetDoc().ConfigureAwait(false);
+                    break;
+                case ParserContent.HttpResponseMessage:
+                    doc = new HtmlDocument();
+                    doc.LoadHtml(await HttpResponse.Content.ReadAsStringAsync().ConfigureAwait(false));
+                    break;
+                default:
+                    throw new ParserContentNotSupportedException(null, Content);
             }
-            var doc = new HtmlDocument();
-            doc.LoadHtml(htmldata);
+
             var messages = new ConversationMessages();
 
-            if (string.IsNullOrWhiteSpace(Html)) {
+            if (Content == ParserContent.Url) {
                 var pages = doc.DocumentNode.SelectSingleNode("//div[@class='PageNav']")?.GetAttributeValue("data-last", 0) ?? 1;
                 if (pages - _startPage < 0) return new ConversationMessages();
                 var pageMax = _pageCount <= 0 ? pages : (_startPage + _pageCount - 1 >= pages ? pages : _startPage + _pageCount - 1);
@@ -58,6 +76,6 @@ namespace GommeHDnetForumAPI.Parser
                 let authorurl = authornode.GetAttributeValue("href", "")
                 let authorid = string.IsNullOrWhiteSpace(authorurl) ? 0 : long.Parse(authorurl.Split('.')[authorurl.Split('.').Length - 1].TrimEnd('/'))
                 let content = node.SelectSingleNode(".//div[@class='messageContent']/article/blockquote").InnerText.Replace("&nbsp;", " ").Trim()
-                select new ConversationMessage(id, new UserInfo(Forum, authorid, authorname), content));
+                select new ConversationMessage(Forum, id, new UserInfo(Forum, authorid, authorname), content));
     }
 }

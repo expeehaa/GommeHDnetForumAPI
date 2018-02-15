@@ -1,8 +1,11 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace GommeHDnetForumAPI.DataModels.Exceptions
 {
+    /// <inheritdoc />
+    /// <summary>
+    /// Thrown when GommeHDnetForumAPI.Forum#Login is executed and no credentials are available
+    /// </summary>
     public class CredentialsRequiredException : Exception
     {
         public CredentialsRequiredException()
@@ -10,14 +13,6 @@ namespace GommeHDnetForumAPI.DataModels.Exceptions
         }
 
         public CredentialsRequiredException(string message) : base(message)
-        {
-        }
-
-        public CredentialsRequiredException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        protected CredentialsRequiredException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

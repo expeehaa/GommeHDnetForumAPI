@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Entities;
@@ -14,11 +15,11 @@ namespace GommeHDnetForumAPI.Parser
     {
         private readonly bool _ignoreLoginCheck;
 
-        public UserInfoParser(Forum forum, ForumUrlPathString urlpath, bool ignoreLoginCheck = false) : base(forum, urlpath) {
+        public UserInfoParser(Forum forum, string urlpath, bool ignoreLoginCheck = false) : base(forum, new BasicUrl(urlpath)) {
             _ignoreLoginCheck = ignoreLoginCheck;
         }
 
-        public UserInfoParser(Forum forum, long userId) : base(forum, new ForumUrlPathString("forum/members/" + userId)) {
+        public UserInfoParser(Forum forum, long userId) : base(forum, new BasicUrl($"{ForumPaths.MembersPath}{userId}/")) {
         }
 
         public UserInfoParser(Forum forum, string html) : base(forum, html) {
@@ -26,18 +27,35 @@ namespace GommeHDnetForumAPI.Parser
 
         public override async Task<UserInfo> ParseAsync()
         {
-            var htmldata = Html;
-            if (string.IsNullOrWhiteSpace(Html))
+            HtmlDocument doc;
+            switch (Content)
             {
-                if (!Forum.LoggedIn && !_ignoreLoginCheck) throw new LoginRequiredException("Getting conversation messages needs login!");
-                var hrm = await Forum.GetData(Url, false);
-                if (hrm.StatusCode == HttpStatusCode.Forbidden) throw new UserProfileAccessException();
-                if (hrm.StatusCode == HttpStatusCode.NotFound) throw new UserNotFoundException();
-                if (!hrm.IsSuccessStatusCode) return null;
-                htmldata = await hrm.Content.ReadAsStringAsync().ConfigureAwait(false);
+                case ParserContent.Html:
+                    doc = new HtmlDocument();
+                    doc.LoadHtml(Html);
+                    break;
+                case ParserContent.Url:
+                    try {
+                        doc = await GetDoc(_ignoreLoginCheck, CheckHttpResponseMessage).ConfigureAwait(false);
+                    }
+                    catch (ReturnNullException) {
+                        return null;
+                    }
+                    break;
+                case ParserContent.HttpResponseMessage:
+                    try {
+                        CheckHttpResponseMessage(HttpResponse);
+                    }
+                    catch (ReturnNullException) {
+                        return null;
+                    }
+                    doc = new HtmlDocument();
+                    doc.LoadHtml(await HttpResponse.Content.ReadAsStringAsync().ConfigureAwait(false));
+                    break;
+                default:
+                    throw new ParserContentNotSupportedException(null, Content);
             }
-            var doc = new HtmlDocument();
-            doc.LoadHtml(htmldata);
+            
             var profilePage = doc.DocumentNode.SelectSingleNode("//div[@class='profilePage']");
             if(profilePage == null) throw new NodeNotFoundException("ProfilePage node not found!");
             var userId = doc.GetElementbyId("get-premium").GetAttributeValue("data-user-id", 0);
@@ -65,6 +83,12 @@ namespace GommeHDnetForumAPI.Parser
                 Location = location,
                 Gender = gender
             };
+        }
+
+        private static void CheckHttpResponseMessage(HttpResponseMessage hrm) {
+            if (hrm.StatusCode == HttpStatusCode.Forbidden) throw new UserProfileAccessException();
+            if (hrm.StatusCode == HttpStatusCode.NotFound) throw new UserNotFoundException();
+            if (!hrm.IsSuccessStatusCode) throw new ReturnNullException();
         }
     }
 }

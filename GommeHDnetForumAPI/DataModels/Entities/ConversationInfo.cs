@@ -8,7 +8,7 @@ using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.DataModels.Entities
 {
-    public class ConversationInfo : ForumEntity
+    public class ConversationInfo : IndexedEntity
     {
         /// <summary>
         /// Conversation title
@@ -32,16 +32,20 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         public ConversationMessages Messages { get; private set; }
 
         /// <summary>
+        /// Url Path equals to forum/conversations/{Id}/
+        /// </summary>
+        public string UrlPath => $"{ForumPaths.ConversationsPath}{Id}/";
+
+        /// <summary>
         /// Internal constructor
         /// </summary>
         /// <param name="forum">Forum instance this object is assigned to.</param>
         /// <param name="id">Conversation ID</param>
         /// <param name="title">Conversation title</param>
-        /// <param name="url">Conversation url relative to Forum.BaseUrl</param>
         /// <param name="author">Conversation author</param>
         /// <param name="members">Conversation members (including author)</param>
         /// <param name="answerCount">Number of answers</param>
-        internal ConversationInfo(Forum forum, long id, string title, string url, UserInfo author, UserCollection members, uint answerCount) : base(forum, id, url)
+        internal ConversationInfo(Forum forum, long id, string title, UserInfo author, UserCollection members, uint answerCount) : base(forum, id)
         {
             Title = title;
             Author = author;
@@ -62,7 +66,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         /// <param name="startPage">First page, starting with 1.</param>
         /// <param name="pageCount">Number of pages. If 0 or less all pages from <paramref name="startPage"/> to last will be downloaded.</param>
         public async Task DownloadMessagesAsync(int startPage, int pageCount = 0) 
-            => Messages = await new ConversationMessageParser(Forum, UrlPath, startPage, pageCount).ParseAsync().ConfigureAwait(false);
+            => Messages = await new ConversationMessageParser(Forum, new BasicUrl(UrlPath), startPage, pageCount).ParseAsync().ConfigureAwait(false);
 
         /// <summary>
         /// Sends a reply to the conversation if possible.

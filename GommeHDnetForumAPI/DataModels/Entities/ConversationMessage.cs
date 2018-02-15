@@ -1,14 +1,12 @@
 ﻿namespace GommeHDnetForumAPI.DataModels.Entities
 {
-    public class ConversationMessage
+    public class ConversationMessage : IndexedEntity
     {
-        public long Id { get; }
         public UserInfo Author { get; }
         public string Content { get; }
 
-        public ConversationMessage(long id, UserInfo author, string content)
+        internal ConversationMessage(Forum forum, long id, UserInfo author, string content) : base(forum, id)
         {
-            Id = id;
             Author = author;
             Content = content;
         }

@@ -4,7 +4,7 @@ using GommeHDnetForumAPI.Parser;
 
 namespace GommeHDnetForumAPI.DataModels.Entities
 {
-    public class UserInfo : ForumEntity
+    public class UserInfo : IndexedEntity
     {
         public string Username { get; internal set; }
         public string AvatarUrl { get; internal set; }
@@ -17,15 +17,19 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         public bool? Verified { get; internal set; }
         public int? Trophies { get; internal set; }
 
+        public string UrlPath => $"{ForumPaths.ForumUrl}members/{Id}";
+
         /// <summary>
         /// Internal constructor
         /// </summary>
         /// <param name="forum">Forum instance</param>
         /// <param name="id">User ID</param>
-        internal UserInfo(Forum forum, long id) : base(forum, id, new ForumUrlPathString(Forum.ForumUrl + "members/" + id)) {
+        internal UserInfo(Forum forum, long id) : base(forum, id)
+        {
         }
 
-        internal UserInfo(Forum forum, long id, string username) : base(forum, id, new ForumUrlPathString(Forum.ForumUrl + "members/" + id)) {
+        internal UserInfo(Forum forum, long id, string username) : base(forum, id)
+        {
             Username = username;
         }
 

@@ -7,7 +7,6 @@ using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using CloudFlareUtilities;
-using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Entities;
 using GommeHDnetForumAPI.DataModels.Exceptions;
@@ -37,13 +36,9 @@ namespace GommeHDnetForumAPI
         public UserInfo SelfUser { get; private set; }
 
         /// <summary>
-        /// Base URL equals to https://www.gommehd.net/
+        /// Forum info of the top level forum located at https://www.gommehd.net/forum/
         /// </summary>
-        public static string BaseUrl => "https://www.gommehd.net/";
-        /// <summary>
-        /// Forum URL equals to https://www.gommehd.net/forum/
-        /// </summary>
-        public static string ForumUrl => BaseUrl + "forum/";
+        public MasterForumInfo MasterForum { get; private set; }
 
         /// <summary>
         /// Set or get the User-Agent header for all HttpRequests.
@@ -85,8 +80,11 @@ namespace GommeHDnetForumAPI
             _username = username;
             _password = password;
             ResetCookies();
-            if(HasCredentials) return await Login().ConfigureAwait(false);
-            return false;
+            if (!HasCredentials) return false;
+            var success = await Login().ConfigureAwait(false);
+            if (!success) return false;
+            MasterForum = await new MasterForumParser(this).ParseAsync().ConfigureAwait(false);
+            return true;
         }
 
         /// <summary>
@@ -103,11 +101,11 @@ namespace GommeHDnetForumAPI
                 SslProtocols = SslProtocols.Tls12
             };
             _clearanceHandler = new ClearanceHandler(_httpClientHandler) {
-                MaxRetries = 3
+                MaxRetries = 5
             };
-            _httpClient = new HttpClient(_clearanceHandler) { BaseAddress = new Uri(BaseUrl) };
+            _httpClient = new HttpClient(_clearanceHandler) { BaseAddress = new Uri(ForumPaths.BaseUrl) };
             _httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-            _httpClient.DefaultRequestHeaders.Add("Referer", BaseUrl);
+            _httpClient.DefaultRequestHeaders.Add("Referer", ForumPaths.BaseUrl);
             _httpClient.Timeout = TimeSpan.FromMinutes(1);
             UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36";
         }
@@ -136,27 +134,21 @@ namespace GommeHDnetForumAPI
             };
             var fuec = new FormUrlEncodedContent(list);
             fuec.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
-            var response = await _httpClient.PostAsync(BaseUrl + "login", fuec).ConfigureAwait(false);
-            if (response.StatusCode == HttpStatusCode.ServiceUnavailable) {
-                var msg = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                doc.LoadHtml(msg);
-                var form = doc.GetElementbyId("challenge-form");
-
-            }
+            var response = await _httpClient.PostAsync(ForumPaths.BaseUrl + "login", fuec).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode) {
                 return false;
             }
             var html = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             doc.LoadHtml(html);
-            var urlpath = new ForumUrlPathString(doc.DocumentNode.SelectSingleNode("//div[@class='userbar']//a[@class='btn btn-link profile']").GetAttributeValue("href", ""));
-            SelfUser = await new UserInfoParser(this, urlpath, true).ParseAsync().ConfigureAwait(false);
+            var urlpath = doc.DocumentNode.SelectSingleNode("//div[@class='userbar']//a[@class='btn btn-link profile']").GetAttributeValue("href", "");
+            SelfUser = await new UserInfoParser(this, urlpath, false).ParseAsync().ConfigureAwait(false);
             return true;
         }
 
         /// <summary>
         /// HTTP post request to forum without login routing.
         /// </summary>
-        /// <param name="path">Path after BaseURL</param>
+        /// <param name="path">Path after ForumPaths.BaseUrl</param>
         /// <param name="body">ForumUrlEncoded body</param>
         /// <param name="checkSuccess">Wether to call EnsureSuccessStatusCode or not on response</param>
         /// <exception cref="HttpRequestException">Thrown if status code != 200</exception>
@@ -164,19 +156,20 @@ namespace GommeHDnetForumAPI
         public async Task<HttpResponseMessage> PostData(string path, List<KeyValuePair<string, string>> body = null, bool checkSuccess = true) {
             var fuec = new FormUrlEncodedContent(body);
             fuec.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
-            var response = await _httpClient.PostAsync(BaseUrl + path, fuec).ConfigureAwait(false);
+            var response = await _httpClient.PostAsync(ForumPaths.BaseUrl + path, fuec).ConfigureAwait(false);
             return checkSuccess ? response.EnsureSuccessStatusCode() : response;
         }
 
         /// <summary>
         /// HTTP get request to forum
         /// </summary>
-        /// <param name="path">Path after BaseURL</param>
+        /// <param name="path">Path (after ForumPaths.BaseUrl)</param>
         /// <param name="checkSuccess">Wether to call EnsureSuccessStatusCode or not on response</param>
+        /// <param name="addBaseUrl">If true ForumPaths.BaseUrl is prepended to <paramref name="path"/></param>
         /// <exception cref="HttpRequestException">Thrown if status code != 200</exception>
         /// <returns>HttpResponseMessage</returns>
-        public async Task<HttpResponseMessage> GetData(string path, bool checkSuccess = true) {
-            var response = await _httpClient.GetAsync(BaseUrl + path);
+        public async Task<HttpResponseMessage> GetData(string path, bool checkSuccess = true, bool addBaseUrl = true) {
+            var response = await _httpClient.GetAsync(addBaseUrl ? ForumPaths.BaseUrl + path : path).ConfigureAwait(false);
             return checkSuccess ? response.EnsureSuccessStatusCode() : response;
         }
         
@@ -219,7 +212,7 @@ namespace GommeHDnetForumAPI
         /// <param name="participants">Conversation participants as string[]</param>
         /// <returns>string containing the Url to creat a conversation.</returns>
         public string GetConversationCreationUrl(string[] participants) 
-            => ForumUrl + "conversations/add?to=" + participants.Aggregate("", (s, u) => $"{s}{u},", s => s.Length > 0 ? s.Substring(0, s.Length - 1) : s);
+            => ForumPaths.ForumUrl + "conversations/add?to=" + participants.Aggregate("", (s, u) => $"{s}{u},", s => s.Length > 0 ? s.Substring(0, s.Length - 1) : s);
 
         /// <summary>
         /// Create a new conversation
@@ -257,6 +250,7 @@ namespace GommeHDnetForumAPI
         public async Task<UserInfo> GetUserInfo(long userId) 
             => await new UserInfoParser(this, userId).ParseAsync().ConfigureAwait(false);
 
+        //todo: throw exceptions
         public async Task<UserInfo> GetUserInfo(string username) {
             var h = await GetData("forum/members/").ConfigureAwait(false);
             var doc = new HtmlDocument();

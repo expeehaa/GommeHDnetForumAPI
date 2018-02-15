@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Collections;
@@ -13,30 +14,45 @@ namespace GommeHDnetForumAPI.Parser
     internal class ConversationInfoParser : Parser<ConversationInfo>
     {
         /// <summary>
-        /// Download HTML from URL and parse to ConversationInfo
+        /// Prepare Parser to parse a given HTML string to ConversationInfo
         /// </summary>
         /// <param name="forum">Forum instance</param>
-        /// <param name="url">url to first page of conversation</param>
-        public ConversationInfoParser(Forum forum, ForumUrlPathString url) : base(forum, url) {}
+        /// <param name="html">Html to use in ParseAsync</param>
+        public ConversationInfoParser(Forum forum, string html) : base(forum, html) { }
+        
+        /// <summary>
+        /// Prepare Parser to download HTML from url and parse that to ConversationInfo
+        /// </summary>
+        /// <param name="forum">Forum instance</param>
+        /// <param name="url">Url to download HTML from.</param>
+        public ConversationInfoParser(Forum forum, BasicUrl url) : base(forum, url) { }
 
         /// <summary>
-        /// Parse a ConversationInfo from HTML
+        /// Prepare Parser to read HTML from an HttpResponseMessage object and parse that to ConversationInfo
         /// </summary>
         /// <param name="forum">Forum instance</param>
-        /// <param name="html">html of first page of conversation</param>
-        public ConversationInfoParser(Forum forum, string html) : base(forum, html) {}
+        /// <param name="hrm">HttpResponseMessage object</param>
+        public ConversationInfoParser(Forum forum, HttpResponseMessage hrm) : base(forum, hrm) { }
+
 
         public override async Task<ConversationInfo> ParseAsync() {
-            var con = Html;
-            if (string.IsNullOrWhiteSpace(Html)) {
-                if (!Forum.LoggedIn) throw new LoginRequiredException();
-
-                var hrm = await Forum.GetData(Url).ConfigureAwait(false);
-                con = await hrm.Content.ReadAsStringAsync().ConfigureAwait(false);
+            HtmlDocument doc;
+            switch (Content)
+            {
+                case ParserContent.Html:
+                    doc = new HtmlDocument();
+                    doc.LoadHtml(Html);
+                    break;
+                case ParserContent.Url:
+                    doc = await GetDoc().ConfigureAwait(false);
+                    break;
+                case ParserContent.HttpResponseMessage:
+                    doc = new HtmlDocument();
+                    doc.LoadHtml(await HttpResponse.Content.ReadAsStringAsync().ConfigureAwait(false));
+                    break;
+                default:
+                    throw new ParserContentNotSupportedException(null, Content);
             }
-
-            var doc = new HtmlDocument();
-            doc.LoadHtml(con);
 
             var container = doc.DocumentNode.SelectSingleNode("//div[@class='mainContainer']");
 
@@ -48,7 +64,7 @@ namespace GommeHDnetForumAPI.Parser
             var title = container.SelectSingleNode("//div[@class='titleBar']/h1").InnerText;
             var url = string.Join("/", idstrar.Except(new List<string> { idstrar[idstrar.Length - 1] }));
 
-            var messages = await new ConversationMessageParser(Forum, con).ParseAsync().ConfigureAwait(false);
+            var messages = await new ConversationMessageParser(Forum, doc.ParsedText).ParseAsync().ConfigureAwait(false);
             if (!messages.Any()) return null;
             var author = messages[0].Author;
             var recipients = new UserCollection(from li in container.SelectNodes("//ul[@id='ConversationRecipients']/li")
@@ -59,7 +75,7 @@ namespace GommeHDnetForumAPI.Parser
                 select new UserInfo(Forum, userid));
             var answers = uint.Parse(container.SelectSingleNode("//div[@class='secondaryContent']/div[@class='pairsJustified']").SelectSingleNode("//dl/dt[@]").InnerText);
 
-            return new ConversationInfo(Forum, id, title, url, author, recipients, answers);
+            return new ConversationInfo(Forum, id, title, author, recipients, answers);
         }
     }
 }
