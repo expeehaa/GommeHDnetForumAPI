@@ -4,18 +4,24 @@ using GommeHDnetForumAPI.DataModels.Entities;
 
 namespace GommeHDnetForumAPI.DataModels.Collections
 {
-    public class UserCollection : DataModelCollection<UserInfo>
+    public class UserCollection : List<UserInfo>
     {
-        public async Task DownloadDataAsync()
+        public UserCollection()
         {
-            foreach (var userInfo in Items)
-            {
-                await userInfo.DownloadDataAsync().ConfigureAwait(false);
-            }
         }
 
-        public UserCollection() { }
-        public UserCollection(DataModelCollection<UserInfo> items) : base(items) { }
-        public UserCollection(IEnumerable<UserInfo> items) : base(items) { }
+        public UserCollection(IEnumerable<UserInfo> collection) : base(collection)
+        {
+        }
+
+        public UserCollection(int capacity) : base(capacity)
+        {
+        }
+
+        public async Task DownloadDataAsync()
+        {
+            foreach (var userInfo in this)
+                await userInfo.DownloadDataAsync().ConfigureAwait(false);
+        }
     }
 }

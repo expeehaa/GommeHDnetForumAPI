@@ -46,5 +46,10 @@
         /// Forums path equals to forum/forums/
         /// </summary>
         public const string ForumsPath = ForumPath + "forums/";
+
+        /// <summary>
+        /// Forum threads path equals to forum/threads/
+        /// </summary>
+        public const string ForumThreadsPath = ForumPath + "threads/";
     }
 }

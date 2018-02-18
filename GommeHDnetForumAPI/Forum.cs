@@ -177,7 +177,7 @@ namespace GommeHDnetForumAPI
         /// Get all conversations.
         /// </summary>
         /// <returns>Object containing all conversations the user had.</returns>
-        public async Task<Conversations> GetConversations()
+        public async Task<ThreadCollection<ConversationInfo>> GetConversations() 
             => await new ConversationsParser(this, 0, 0).ParseAsync().ConfigureAwait(false);
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace GommeHDnetForumAPI
         /// <param name="participants">Conversation participants as UserCollection</param>
         /// <returns>string containing the Url to creat a conversation.</returns>
         public string GetConversationCreationUrl(UserCollection participants) 
-            => GetConversationCreationUrl((from p in participants select p.Username).ToArray());
+            => GetConversationCreationUrl(participants.Select(p => p.Username).ToArray());
 
         /// <summary>
         /// Returns an Url as a string to create a new conversation with the given <paramref name="participants"/> in a browser window.
@@ -212,7 +212,7 @@ namespace GommeHDnetForumAPI
         /// <param name="participants">Conversation participants as string[]</param>
         /// <returns>string containing the Url to creat a conversation.</returns>
         public string GetConversationCreationUrl(string[] participants) 
-            => ForumPaths.ForumUrl + "conversations/add?to=" + participants.Aggregate("", (s, u) => $"{s}{u},", s => s.Length > 0 ? s.Substring(0, s.Length - 1) : s);
+            => $"{ForumPaths.ConversationsUrl}add?to={string.Join(", ", participants)}";
 
         /// <summary>
         /// Create a new conversation
@@ -225,7 +225,7 @@ namespace GommeHDnetForumAPI
         public async Task<ConversationInfo> CreateConversation(string[] participants, string title, string message, bool openInvite = false)
         {
             if(!LoggedIn) throw new LoginRequiredException("Log in to create a new conversation!");
-            var h = await GetData("forum/conversations/add").ConfigureAwait(false);
+            var h = await GetData($"{ForumPaths.ConversationsPath}add").ConfigureAwait(false);
             var doc = new HtmlDocument();
             doc.LoadHtml(await h.Content.ReadAsStringAsync().ConfigureAwait(false));
             var xftoken = doc.DocumentNode.SelectSingleNode("//input[@name='_xfToken']").GetAttributeValue("value", "");
@@ -238,7 +238,7 @@ namespace GommeHDnetForumAPI
                 new KeyValuePair<string, string>("open_invite", openInvite ? "1" : "0"),
                 new KeyValuePair<string, string>("_xfToken", xftoken)
             };
-            var hrm = await PostData("forum/conversations/insert", kvlist).ConfigureAwait(false);
+            var hrm = await PostData($"{ForumPaths.ConversationsPath}insert", kvlist).ConfigureAwait(false);
             return await new ConversationInfoParser(this, await hrm.Content.ReadAsStringAsync().ConfigureAwait(false)).ParseAsync().ConfigureAwait(false);
         }
 
@@ -252,12 +252,12 @@ namespace GommeHDnetForumAPI
 
         //todo: throw exceptions
         public async Task<UserInfo> GetUserInfo(string username) {
-            var h = await GetData("forum/members/").ConfigureAwait(false);
+            var h = await GetData(ForumPaths.MembersPath).ConfigureAwait(false);
             var doc = new HtmlDocument();
             doc.LoadHtml(await h.Content.ReadAsStringAsync().ConfigureAwait(false));
             var xftoken = doc.DocumentNode.SelectSingleNode("//form[@action='members/']/input[@name='_xfToken']").GetAttributeValue("value", "");
 
-            var hrm = await PostData("forum/members/", new List<KeyValuePair<string, string>> {
+            var hrm = await PostData(ForumPaths.MembersPath, new List<KeyValuePair<string, string>> {
                 new KeyValuePair<string, string>("username", username),
                 new KeyValuePair<string, string>("_xfToken", xftoken)
             }, false).ConfigureAwait(false);

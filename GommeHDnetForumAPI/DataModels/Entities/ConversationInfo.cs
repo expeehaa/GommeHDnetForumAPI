@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Exceptions;
@@ -8,7 +7,7 @@ using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.DataModels.Entities
 {
-    public class ConversationInfo : IndexedEntity
+    public class ConversationInfo : IndexedEntity, IThread<ConversationMessage>
     {
         /// <summary>
         /// Conversation title
@@ -29,7 +28,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         /// <summary>
         /// Message collection
         /// </summary>
-        public ConversationMessages Messages { get; private set; }
+        public IEnumerable<ConversationMessage> Messages { get; private set; }
 
         /// <summary>
         /// Url Path equals to forum/conversations/{Id}/
@@ -66,7 +65,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         /// <param name="startPage">First page, starting with 1.</param>
         /// <param name="pageCount">Number of pages. If 0 or less all pages from <paramref name="startPage"/> to last will be downloaded.</param>
         public async Task DownloadMessagesAsync(int startPage, int pageCount = 0) 
-            => Messages = await new ConversationMessageParser(Forum, new BasicUrl(UrlPath), startPage, pageCount).ParseAsync().ConfigureAwait(false);
+            => Messages = await new ConversationMessageParser(Forum, new BasicUrl(UrlPath), startPage, pageCount, this).ParseAsync().ConfigureAwait(false);
 
         /// <summary>
         /// Sends a reply to the conversation if possible.
@@ -89,8 +88,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
                 new KeyValuePair<string, string>("_xfRelativeResolver", xfrelativeresolver)
             };
             var hrm = await Forum.PostData(UrlPath + "insert-reply", kvlist, false).ConfigureAwait(false);
-            var messages = await new ConversationMessageParser(Forum, await hrm.Content.ReadAsStringAsync()).ParseAsync().ConfigureAwait(false);
-            Messages.Add(messages.Last());
+            await DownloadMessagesAsync().ConfigureAwait(false);
             return hrm.IsSuccessStatusCode;
         }
 

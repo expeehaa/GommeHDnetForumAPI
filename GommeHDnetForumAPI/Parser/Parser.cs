@@ -36,9 +36,9 @@ namespace GommeHDnetForumAPI.Parser
 
         public abstract Task<T> ParseAsync();
 
-        protected async Task<HtmlDocument> GetDoc(bool loginRequired = true, Action<HttpResponseMessage> onResponse = null) {
+        protected async Task<HtmlDocument> GetDoc(bool loginRequired = true, Action<HttpResponseMessage> onResponse = null, string url = null) {
             if (!Forum.LoggedIn && loginRequired) throw new LoginRequiredException("Login required!");
-            var hrm = await Forum.GetData(Url.Url).ConfigureAwait(false);
+            var hrm = await Forum.GetData(url ?? Url.Url).ConfigureAwait(false);
             onResponse?.Invoke(hrm);
             var doc = new HtmlDocument();
             doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));

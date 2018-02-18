@@ -20,19 +20,19 @@ namespace GommeHDnetForumAPI.Parser
         /// <param name="html">Html to use in ParseAsync</param>
         public ConversationInfoParser(Forum forum, string html) : base(forum, html) { }
         
-        /// <summary>
-        /// Prepare Parser to download HTML from url and parse that to ConversationInfo
-        /// </summary>
-        /// <param name="forum">Forum instance</param>
-        /// <param name="url">Url to download HTML from.</param>
-        public ConversationInfoParser(Forum forum, BasicUrl url) : base(forum, url) { }
+        ///// <summary>
+        ///// Prepare Parser to download HTML from url and parse that to ConversationInfo
+        ///// </summary>
+        ///// <param name="forum">Forum instance</param>
+        ///// <param name="url">Url to download HTML from.</param>
+        //public ConversationInfoParser(Forum forum, BasicUrl url) : base(forum, url) { }
 
-        /// <summary>
-        /// Prepare Parser to read HTML from an HttpResponseMessage object and parse that to ConversationInfo
-        /// </summary>
-        /// <param name="forum">Forum instance</param>
-        /// <param name="hrm">HttpResponseMessage object</param>
-        public ConversationInfoParser(Forum forum, HttpResponseMessage hrm) : base(forum, hrm) { }
+        ///// <summary>
+        ///// Prepare Parser to read HTML from an HttpResponseMessage object and parse that to ConversationInfo
+        ///// </summary>
+        ///// <param name="forum">Forum instance</param>
+        ///// <param name="hrm">HttpResponseMessage object</param>
+        //public ConversationInfoParser(Forum forum, HttpResponseMessage hrm) : base(forum, hrm) { }
 
 
         public override async Task<ConversationInfo> ParseAsync() {
@@ -60,11 +60,9 @@ namespace GommeHDnetForumAPI.Parser
             if (string.IsNullOrWhiteSpace(idstr)) return null;
             var idstrar = idstr.Split('/');
             var id = long.Parse(idstrar[idstrar.Length - 2].Substring(idstrar[idstrar.Length - 2].LastIndexOf(".", StringComparison.OrdinalIgnoreCase) + 1));
-
             var title = container.SelectSingleNode("//div[@class='titleBar']/h1").InnerText;
-            var url = string.Join("/", idstrar.Except(new List<string> { idstrar[idstrar.Length - 1] }));
 
-            var messages = await new ConversationMessageParser(Forum, doc.ParsedText).ParseAsync().ConfigureAwait(false);
+            var messages = (await new ConversationMessageParser(Forum, doc.ParsedText, null).ParseAsync().ConfigureAwait(false)).ToList();
             if (!messages.Any()) return null;
             var author = messages[0].Author;
             var recipients = new UserCollection(from li in container.SelectNodes("//ul[@id='ConversationRecipients']/li")

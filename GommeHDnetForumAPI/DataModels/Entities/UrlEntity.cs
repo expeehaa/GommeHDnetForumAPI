@@ -1,9 +1,9 @@
 ﻿namespace GommeHDnetForumAPI.DataModels.Entities
 {
-    public class UrlEntity
+    public class UrlEntity : IUrlPath
     {
-        protected Forum Forum { get; }
-        protected string UrlPath { get; }
+        public Forum Forum { get; }
+        public string UrlPath { get; }
 
         internal UrlEntity(Forum forum, string urlPath) {
             Forum = forum;

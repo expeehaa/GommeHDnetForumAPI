@@ -12,20 +12,25 @@
         /// </summary>
         public string Description { get; }
 
-        public MasterForumCategoryInfo ParentCategory { get; }
+        /// <summary>
+        /// Parent implementing IForum
+        /// </summary>
+        public IForum Parent { get; }
 
         /// <summary>
         /// Urlpath to sublink
         /// </summary>
         public string UrlPath => $"{ForumPaths.LinkForumsPath}{Id}/";
 
-        internal SubLink(Forum forum, long id, MasterForumCategoryInfo parentCategory, string title, string description) : base(forum, id) {
+        internal SubLink(Forum forum, long id, IForum parent, string title, string description) : base(forum, id) {
             Title = title;
             Description = description;
-            ParentCategory = parentCategory;
+            Parent = parent;
         }
 
         public override string ToString()
             => $"({Title}({Id}) | {Description})";
+
+        
     }
 }

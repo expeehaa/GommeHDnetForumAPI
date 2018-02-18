@@ -2,8 +2,8 @@
 {
     public class IndexedEntity
     {
-        protected Forum Forum { get; }
-        protected long Id { get; }
+        public Forum Forum { get; }
+        public long Id { get; }
 
         internal IndexedEntity(Forum forum, long id) {
             Forum = forum;

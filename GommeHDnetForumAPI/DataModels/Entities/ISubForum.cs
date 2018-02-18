@@ -1,10 +1,7 @@
 ﻿namespace GommeHDnetForumAPI.DataModels.Entities
 {
-    public interface ISubForum
+    public interface ISubForum : IForum
     {
-        string Title { get; }
-        string Description { get; }
-        MasterForumCategoryInfo ParentCategory { get; }
-        string UrlPath { get; }
+        IForum Parent { get; }
     }
 }

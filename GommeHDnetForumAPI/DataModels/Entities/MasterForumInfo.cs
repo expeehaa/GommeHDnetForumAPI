@@ -1,19 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.Parser;
 
 namespace GommeHDnetForumAPI.DataModels.Entities
 {
     public class MasterForumInfo : UrlEntity
     {
-        public DataModelCollection<MasterForumCategoryInfo> Categories { get; private set; }
-        public IEnumerable<ISubForum> SubForums => Categories.SelectMany(c => c.SubForums);
+        public IEnumerable<MasterForumCategoryInfo> Categories { get; private set; }
+        public IEnumerable<SubForum> SubForums => Categories?.SelectMany(c => c.RealSubForums);
+        public IEnumerable<SubLink> SubLinks => Categories?.SelectMany(c => c.SubLinks);
 
         internal MasterForumInfo(Forum forum) : base(forum, ForumPaths.ForumUrl) { }
 
-        internal MasterForumInfo(Forum forum, DataModelCollection<MasterForumCategoryInfo> categories) : this(forum) {
+        internal MasterForumInfo(Forum forum, IEnumerable<MasterForumCategoryInfo> categories) : this(forum) {
             Categories = categories;
         }
 
