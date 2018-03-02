@@ -3,11 +3,12 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser
 {
-    internal class SubForumLiNodeParser : LiNodeParser<ISubForum>
+    internal class SubForumLiNodeParser : LiNodeParser<ISubForum, IForum>
     {
         public SubForumLiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes, IForum parent) : base(forum, liNodes, parent) { }
         

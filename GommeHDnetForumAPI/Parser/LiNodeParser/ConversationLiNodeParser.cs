@@ -7,9 +7,9 @@ using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser
 {
-    internal class ConversationLiNodeParser : LiNodeParser<ConversationInfo>
+    internal class ConversationLiNodeParser : LiNodeParser<ConversationInfo, object>
     {
-        public ConversationLiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes, IForum parent) : base(forum, liNodes, parent) { }
+        public ConversationLiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes) : base(forum, liNodes, null) { }
 
         protected override ConversationInfo ParseElement(HtmlNode node) {
             if (!Regex.IsMatch(node.Id, "conversation-([0-9]+)")) return null;

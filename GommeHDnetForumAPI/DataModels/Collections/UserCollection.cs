@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels.Entities;
 
@@ -23,5 +24,8 @@ namespace GommeHDnetForumAPI.DataModels.Collections
             foreach (var userInfo in this)
                 await userInfo.DownloadDataAsync().ConfigureAwait(false);
         }
+
+        public override string ToString()
+            => string.Join(", ", this.Select(u => $"({u.ToString()})"));
     }
 }

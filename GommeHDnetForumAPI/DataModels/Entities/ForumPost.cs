@@ -1,4 +1,6 @@
-﻿namespace GommeHDnetForumAPI.DataModels.Entities
+﻿using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+
+namespace GommeHDnetForumAPI.DataModels.Entities
 {
     public class ForumPost : IndexedEntity, IPost<ForumThread>
     {
@@ -12,5 +14,8 @@
             Content = content;
             Parent = parent;
         }
+
+        public override string ToString()
+            => $"Id: {Id} | Author: ({Author}) | Content: {Content}";
     }
 }

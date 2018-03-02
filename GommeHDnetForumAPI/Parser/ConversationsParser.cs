@@ -17,7 +17,7 @@ namespace GommeHDnetForumAPI.Parser
         private int _startPage;
         private readonly int _pageCount;
 
-        public ConversationsParser(Forum forum, int startPage, int pageCount) : base(forum, new BasicUrl(ForumPaths.ConversationsUrl)) {
+        public ConversationsParser(Forum forum, int startPage, int pageCount) : base(forum, new BasicUrl(ForumPaths.ConversationsPath)) {
             _startPage = startPage < 1 ? 1 : startPage;
             _pageCount = pageCount;
         }
@@ -35,7 +35,7 @@ namespace GommeHDnetForumAPI.Parser
                 liNodes.AddRange((await GetDoc(url: $"{Url}?page={i}").ConfigureAwait(false)).DocumentNode.SelectNodes("//ol[@class='discussionListItems']/li").ToList());
             }
 
-            return new ThreadCollection<ConversationInfo>(await new ConversationLiNodeParser(Forum, liNodes, null).ParseAsync().ConfigureAwait(false));
+            return new ThreadCollection<ConversationInfo>(await new ConversationLiNodeParser(Forum, liNodes).ParseAsync().ConfigureAwait(false));
         }
     }
 }

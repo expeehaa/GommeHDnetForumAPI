@@ -1,4 +1,6 @@
-﻿namespace GommeHDnetForumAPI.DataModels.Entities
+﻿using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+
+namespace GommeHDnetForumAPI.DataModels.Entities
 {
     public class UrlEntity : IUrlPath
     {

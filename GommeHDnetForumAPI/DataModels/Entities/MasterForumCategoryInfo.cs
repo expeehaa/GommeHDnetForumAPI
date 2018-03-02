@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
 
 namespace GommeHDnetForumAPI.DataModels.Entities
 {

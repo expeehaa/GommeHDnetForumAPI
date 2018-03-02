@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels.Collections;
+using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
 using GommeHDnetForumAPI.Parser;
 
 namespace GommeHDnetForumAPI.DataModels.Entities
@@ -13,9 +13,9 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         public IForum Parent { get; }
         public long? PostCount { get; private set; }
         public IEnumerable<ISubForum> SubForums { get; internal set; }
-        public ForumThreadCollection Threads { get; internal set; }
+        public IEnumerable<ForumThread> Threads { get; internal set; }
         public IEnumerable<ThreadPrefix> Prefixes { get; internal set; }
-        public long? ThreadCount => Threads?.Count;
+        public long? ThreadCount => Threads?.Count();
         public long? SubForumCount => SubForums?.Count();
 
         public string UrlPath => $"{ForumPaths.ForumsPath}{Id}/";

@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser
 {
-    internal abstract class LiNodeParser<T> : Parser<IEnumerable<T>>
+    internal abstract class LiNodeParser<T, O> : Parser<IEnumerable<T>>
     {
         protected readonly IEnumerable<HtmlNode> LiNodes;
-        protected readonly IForum Parent;
+        protected readonly O Parent;
 
-        protected LiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes, IForum parent) : base(forum) {
+        protected LiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes, O parent) : base(forum) {
             LiNodes = liNodes;
             Parent = parent;
         }

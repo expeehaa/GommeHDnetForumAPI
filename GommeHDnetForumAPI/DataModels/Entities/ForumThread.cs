@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+using GommeHDnetForumAPI.Parser;
 
 namespace GommeHDnetForumAPI.DataModels.Entities
 {
@@ -19,10 +22,11 @@ namespace GommeHDnetForumAPI.DataModels.Entities
             Prefix = prefix;
         }
 
-        public Task DownloadMessagesAsync()
-        {
-            throw new System.NotImplementedException();
-        }
+        public async Task DownloadMessagesAsync()
+            => await DownloadMessagesAsync(1).ConfigureAwait(false);
+
+        public async Task DownloadMessagesAsync(int startPage, int pageCount = 0)
+            => Messages = (await new ForumThreadMessageParser(Forum, this, startPage, pageCount).ParseAsync().ConfigureAwait(false)).ToList();
 
         public override string ToString()
             => $"Id: {Id} | {(Prefix == null ? $"Title: {Title}" : $"(P)Title: ({Prefix}){Title}")} | Author: {Author.Username} | Parent: {Parent.Title}";

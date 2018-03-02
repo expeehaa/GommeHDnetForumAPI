@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels.Collections;
+using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
 using GommeHDnetForumAPI.DataModels.Exceptions;
 using GommeHDnetForumAPI.Parser;
 using HtmlAgilityPack;
@@ -65,7 +67,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         /// <param name="startPage">First page, starting with 1.</param>
         /// <param name="pageCount">Number of pages. If 0 or less all pages from <paramref name="startPage"/> to last will be downloaded.</param>
         public async Task DownloadMessagesAsync(int startPage, int pageCount = 0) 
-            => Messages = await new ConversationMessageParser(Forum, new BasicUrl(UrlPath), startPage, pageCount, this).ParseAsync().ConfigureAwait(false);
+            => Messages = (await new ConversationMessageParser(Forum, this, startPage, pageCount).ParseAsync().ConfigureAwait(false)).ToList();
 
         /// <summary>
         /// Sends a reply to the conversation if possible.
@@ -93,6 +95,6 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         }
 
         public override string ToString() 
-            => $"Id: {Id} | Title: \"{Title}\" | Author: \"{Author}\" | Answers: {AnswerCount} | Members: ({Members}) | Messages: ({Messages})";
+            => $"Id: {Id} | Title: \"{Title}\" | Author: \"{Author}\" | Answers: {AnswerCount} | Members: ({Members}) | Messages: ({string.Join(", ", Messages.Select(c => $"({c.ToString()})"))})";
     }
 }

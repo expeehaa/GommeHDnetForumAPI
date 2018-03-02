@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
 using GommeHDnetForumAPI.Parser.LiNodeParser;
 using HtmlAgilityPack;
 

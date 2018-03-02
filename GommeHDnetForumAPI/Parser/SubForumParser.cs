@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
-using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
 using GommeHDnetForumAPI.DataModels.Exceptions;
 using GommeHDnetForumAPI.Parser.LiNodeParser;
 using HtmlAgilityPack;
@@ -13,7 +13,7 @@ namespace GommeHDnetForumAPI.Parser
     internal class SubForumParser : Parser<SubForum>
     {
         private readonly SubForum _subForum;
-        private int _startPage;
+        private readonly int _startPage;
         private readonly int _pageCount;
 
         public SubForumParser(SubForum subforum, int startPage, int pageCount) : base(subforum.Forum, new BasicUrl(subforum.UrlPath)) {
@@ -37,13 +37,14 @@ namespace GommeHDnetForumAPI.Parser
             var desc = doc.GetElementbyId("pageDescription")?.InnerText ?? string.Empty;
 
             //threads parsing
-            var threads = new ForumThreadCollection();
+            var threads = new List<ForumThread>();
             var pages = doc.DocumentNode.SelectSingleNode("//div[@class='PageNav']")?.GetAttributeValue("data-last", 0) ?? 1;
-            if (_startPage < 1) _startPage = 1;
             if (pages >= _startPage) {
                 var pageMax = _pageCount <= 0 ? pages : (_startPage + _pageCount - 1 >= pages ? pages : _startPage + _pageCount - 1);
 
                 var liNodes = new List<HtmlNode>();
+                //Parallel.For(_startPage, pageMax + 1, async i
+                //    => liNodes.AddRange((await GetDoc(url: $"{Url}page-{i}").ConfigureAwait(false)).DocumentNode.SelectNodes("//ol[@class='discussionListItems']/li").ToList()));
                 for (var i = _startPage; i <= pageMax; i++)
                 {
                     liNodes.AddRange((await GetDoc(url: $"{Url}page-{i}").ConfigureAwait(false)).DocumentNode.SelectNodes("//ol[@class='discussionListItems']/li").ToList());
@@ -51,6 +52,7 @@ namespace GommeHDnetForumAPI.Parser
 
                 threads.AddRange(await new ThreadsLiNodeParser(Forum, liNodes, _subForum).ParseAsync().ConfigureAwait(false));
             }
+
             //prefix parsing
             var prefixes = new List<ThreadPrefix>();
             foreach (var o in doc.DocumentNode.SelectNodes(".//option").ToList()) {
@@ -62,7 +64,7 @@ namespace GommeHDnetForumAPI.Parser
             return new SubForum(Forum, _subForum.Id, _subForum.Parent, title, desc, _subForum.PostCount)
             {
                 SubForums = subforums,
-                Threads = new ForumThreadCollection(threads),
+                Threads = threads,
                 Prefixes = prefixes
             };
         }

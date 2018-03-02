@@ -50,6 +50,8 @@ namespace GommeHDnetForumAPI.Parser
                     doc = new HtmlDocument();
                     doc.LoadHtml(await HttpResponse.Content.ReadAsStringAsync().ConfigureAwait(false));
                     break;
+                case ParserContent.None:
+                    throw new ParserContentNotSupportedException(null, Content);
                 default:
                     throw new ParserContentNotSupportedException(null, Content);
             }
@@ -62,7 +64,7 @@ namespace GommeHDnetForumAPI.Parser
             var id = long.Parse(idstrar[idstrar.Length - 2].Substring(idstrar[idstrar.Length - 2].LastIndexOf(".", StringComparison.OrdinalIgnoreCase) + 1));
             var title = container.SelectSingleNode("//div[@class='titleBar']/h1").InnerText;
 
-            var messages = (await new ConversationMessageParser(Forum, doc.ParsedText, null).ParseAsync().ConfigureAwait(false)).ToList();
+            var messages = (await new ConversationMessageParser(Forum, null, doc.DocumentNode.OuterHtml).ParseAsync().ConfigureAwait(false)).ToList();
             if (!messages.Any()) return null;
             var author = messages[0].Author;
             var recipients = new UserCollection(from li in container.SelectNodes("//ul[@id='ConversationRecipients']/li")
