@@ -20,8 +20,17 @@ namespace GommeHDnetForumAPI.DataModels.Entities
 
         public string UrlPath => $"{ForumPaths.ForumsPath}{Id}/";
         public string RssFeed => $"{UrlPath}index.rss";
-        public IEnumerable<SubForum> RealSubForums => SubForums?.Select(sf => sf as SubForum).Where(sf => sf != null);
-        public IEnumerable<SubLink> SubLinks => SubForums?.Select(sl => sl as SubLink).Where(sl => sl != null);
+
+        public IEnumerable<SubForum> RealSubForums => SubForums?.Select(sf => sf as SubForum).Where(sf => sf != null).ToList();
+        public IEnumerable<SubForum> AllRealSubForums {
+            get {
+                var list = new List<SubForum>(RealSubForums ?? new List<SubForum>());
+                list.AddRange(SubForums?.Where(sf => sf is SubForum).SelectMany(sf => ((SubForum) sf).AllRealSubForums) ?? new List<SubForum>());
+                return list;
+            }
+        }
+
+        public IEnumerable<SubLink> SubLinks => SubForums?.Select(sl => sl as SubLink).Where(sl => sl != null).ToList();
         
         internal SubForum(Forum forum, long id, IForum parent, string title, string description, long? postCount) : base(forum, id) {
             Title = title;
@@ -34,7 +43,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
             => await DownloadDataAsync(1).ConfigureAwait(false);
 
         public async Task DownloadDataAsync(int startPage, int pageCount = 0) {
-            var sf = await new SubForumParser(this, 1, 0).ParseAsync().ConfigureAwait(false);
+            var sf = await new SubForumParser(this, startPage, pageCount).ParseAsync().ConfigureAwait(false);
             Title = sf.Title;
             Description = sf.Description;
             PostCount = sf.PostCount;
@@ -44,6 +53,6 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         }
 
         public override string ToString()
-            => $"({Title}({Id}) | {ThreadCount} | {PostCount} | {SubForumCount})";
+            => $"({Id}: {Title} | {ThreadCount?.ToString() ?? "null"} | {PostCount?.ToString() ?? "null"} | {SubForumCount?.ToString() ?? "null"})";
     }
 }

@@ -14,7 +14,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         public string Location { get; internal set; }
         public string Status { get; internal set; }
         public Gender Gender { get; internal set; } = Gender.Unknown;
-        public bool? Verified { get; internal set; }
+        public bool? Verified => string.IsNullOrWhiteSpace(Username) ? null : (bool?) (Username.Length < 16);
         public int? Trophies { get; internal set; }
 
         public string UrlPath => $"{ForumPaths.ForumUrl}members/{Id}";
@@ -48,7 +48,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
             Location = nInfo.Location;
             Status = nInfo.Status;
             Gender = nInfo.Gender;
-            Verified = nInfo.Verified;
+            //Verified = nInfo.Verified;
             Trophies = nInfo.Trophies;
         }
 
