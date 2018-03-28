@@ -26,6 +26,9 @@ namespace GommeHDnetForumAPI.DataModels.Collections
         }
 
         public override string ToString()
-            => string.Join(", ", this.Select(u => $"({u.ToString()})"));
+            => ToString(", ");
+
+        public string ToString(string separator)
+            => string.Join(separator, this.Select(u => $"({u.ToString()})"));
     }
 }

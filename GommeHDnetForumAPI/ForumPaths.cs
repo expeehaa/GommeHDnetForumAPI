@@ -1,4 +1,6 @@
-﻿namespace GommeHDnetForumAPI
+﻿using GommeHDnetForumAPI.DataModels;
+
+namespace GommeHDnetForumAPI
 {
     public static class ForumPaths
     {
@@ -51,5 +53,10 @@
         /// Forum threads path equals to forum/threads/
         /// </summary>
         public const string ForumThreadsPath = ForumPath + "threads/";
+
+        public const string MembersListTypePath = MembersPath + "?type=";
+
+        public static string GetMembersListTypePath(MembersListType type) 
+            => MembersListTypePath + type.ToString().ToLower();
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GommeHDnetForumAPI;
+using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Entities;
 
@@ -13,8 +14,9 @@ namespace GommeHDnetForumAPITest
         {
             var creds = CredentialsLoader.GetCredentials();
             var forum = new Forum(creds.Username, creds.Password);
-            
-            TestFunctionalities(forum);
+
+            //TestFunctionalities(forum);
+            TestMembersLists(forum);
             //AllUserAccountsBeforeId(forum, 202);
 
             Console.ReadKey();
@@ -23,12 +25,14 @@ namespace GommeHDnetForumAPITest
 
         public static void TestFunctionalities(Forum forum)
         {
-            var user = forum.SelfUser;
-            var user2 = forum.GetUserInfo("Dom").GetAwaiter().GetResult();
-            var cons = forum.GetConversations().GetAwaiter().GetResult();
-            var con1 = cons.First();
-            con1.DownloadMessagesAsync().GetAwaiter().GetResult();
-            Console.WriteLine(con1);
+            TestUserInfoParsing(forum);
+            TestConversations(forum);
+            TestForumThreads(forum);
+            TestMembersLists(forum);
+        }
+
+        private static void TestForumThreads(Forum forum)
+        {
             const string forumname = "off-topic";
             var someForum = forum.MasterForum.SubForums.FirstOrDefault(sf => string.Equals(sf.Title, forumname, StringComparison.OrdinalIgnoreCase));
             if (someForum != null)
@@ -51,6 +55,38 @@ namespace GommeHDnetForumAPITest
             var allSubForums = forums.Concat(forums.SelectMany(sf => sf.AllRealSubForums)).ToList();
             Console.WriteLine($"\n\nAll Forums ({allSubForums.Count}):");
             Console.WriteLine(string.Join("\n", allSubForums.Select(sf => sf.ToString())));
+
+            Console.ReadLine();
+        }
+
+        private static void TestConversations(Forum forum)
+        {
+            var cons = forum.GetConversations().GetAwaiter().GetResult();
+            var con1 = cons.First();
+            con1.DownloadMessagesAsync().GetAwaiter().GetResult();
+            Console.WriteLine(con1);
+
+            Console.ReadLine();
+        }
+
+        public static void TestUserInfoParsing(Forum forum)
+        {
+            var user = forum.SelfUser;
+            var user2 = forum.GetUserInfo("Klaus").GetAwaiter().GetResult();
+
+            Console.ReadLine();
+        }
+
+        public static void TestMembersLists(Forum forum)
+        {
+            var lists = new List<UserCollection>();
+            foreach (var typeName in Enum.GetNames(typeof(MembersListType)))
+            {
+                var list = forum.GetMembersList(Enum.Parse<MembersListType>(typeName)).GetAwaiter().GetResult();
+                Console.WriteLine($"{typeName} list ({list.Count}):\n{list.ToString("\n")}\n");
+                lists.Add(list);
+            }
+
             Console.ReadLine();
         }
 

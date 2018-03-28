@@ -72,6 +72,17 @@ namespace GommeHDnetForumAPI.Parser
             var location = WebUtility.HtmlDecode(infos.FirstOrDefault(p => p.Key.ToLower().Contains("ort")).Value?.FirstChild?.InnerText.Trim() ?? "");
             var gender = GenderParser.Parse(infos.FirstOrDefault(p => p.Value.GetAttributeValue("itemprop", "").Equals("gender", StringComparison.OrdinalIgnoreCase)).Value?.InnerText);
             //var verified = doc.GetElementbyId("statistic").SelectSingleNode("./div[@class='']/div[@class='stat-table']") == null;
+            var maintextnode = profilePage.SelectSingleNode(".//div[@class='mainText secondaryContent']");
+            var customTitleNode = maintextnode.ChildAttributes("class").FirstOrDefault(ha 
+                => ha.Value.StartsWith("custom-title-", StringComparison.OrdinalIgnoreCase))?.OwnerNode;
+            string userTitle = null;
+            if (customTitleNode == null)
+            {
+                var userTitleNode = profilePage.SelectSingleNode(".//p[@class='userBlurb']/span[@class='userTitle']");
+                if (userTitleNode != null)
+                    userTitle = userTitleNode.InnerText;
+            }
+            else userTitle = customTitleNode.InnerText;
 
             return new UserInfo(Forum, userId, username) {
                 AvatarUrl = avatarUrl,
@@ -79,9 +90,9 @@ namespace GommeHDnetForumAPI.Parser
                 PostCount = gotPosts ? (int?) posts : null,
                 LikeCount = gotLikes ? (int?) likes : null,
                 Trophies = gotTrophies ? (int?) trophies : null,
-                //Verified = verified,
                 Location = location,
-                Gender = gender
+                Gender = gender,
+                UserTitle = userTitle
             };
         }
 

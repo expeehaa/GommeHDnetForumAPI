@@ -16,6 +16,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         public Gender Gender { get; internal set; } = Gender.Unknown;
         public bool? Verified => string.IsNullOrWhiteSpace(Username) ? null : (bool?) (Username.Length < 16);
         public int? Trophies { get; internal set; }
+        public string UserTitle { get; internal set; }
 
         public string UrlPath => $"{ForumPaths.ForumUrl}members/{Id}";
 
@@ -50,6 +51,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
             Gender = nInfo.Gender;
             //Verified = nInfo.Verified;
             Trophies = nInfo.Trophies;
+            UserTitle = nInfo.UserTitle;
         }
 
         public override string ToString() 

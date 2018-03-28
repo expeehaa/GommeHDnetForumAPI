@@ -7,10 +7,12 @@ using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using CloudFlareUtilities;
+using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Entities;
 using GommeHDnetForumAPI.DataModels.Exceptions;
 using GommeHDnetForumAPI.Parser;
+using GommeHDnetForumAPI.Parser.LiNodeParser;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI
@@ -268,6 +270,21 @@ namespace GommeHDnetForumAPI
             catch (NodeNotFoundException) {
                 throw new UserNotFoundException();
             }
+        }
+
+        /// <summary>
+        /// Returns a UserCollection object containing all UserInfo's from the forum's members list of the specified type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public async Task<UserCollection> GetMembersList(MembersListType type)
+        {
+            var hrm = await GetData(ForumPaths.GetMembersListTypePath(type)).ConfigureAwait(false);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
+            var liNodes = doc.DocumentNode.SelectNodes(".//div[@class='section']/ol[@class='memberList']/li");
+            var users = await new MembersListLiNodeParser(this, liNodes).ParseAsync().ConfigureAwait(false);
+            return users.ToUserCollection();
         }
     }
 }

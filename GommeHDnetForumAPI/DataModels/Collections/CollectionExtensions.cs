@@ -4,7 +4,7 @@ using GommeHDnetForumAPI.DataModels.Entities;
 
 namespace GommeHDnetForumAPI.DataModels.Collections
 {
-    public static class ForumThreadCollection
+    public static class CollectionExtensions
     {
 
         public static IEnumerable<ForumThread> FilterByPrefix(this IEnumerable<ForumThread> threads, ThreadPrefix prefix) {
@@ -13,5 +13,8 @@ namespace GommeHDnetForumAPI.DataModels.Collections
 
         public static string ThreadsToString(this IEnumerable<ForumThread> threads)
             => string.Join(", ", threads.Select(t => $"({t.ToString()})"));
+
+        public static UserCollection ToUserCollection(this IEnumerable<UserInfo> userInfos)
+            => new UserCollection(userInfos);
     }
 }
