@@ -286,5 +286,18 @@ namespace GommeHDnetForumAPI
             var users = await new MembersListLiNodeParser(this, liNodes).ParseAsync().ConfigureAwait(false);
             return users.ToUserCollection();
         }
+
+        /// <summary>
+        /// Returns the amount of users currently being on the server.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<int> GetOnlineUserCount()
+        {
+            var hrm = await GetData(ForumPaths.StatsUsersOnlinePath).ConfigureAwait(false);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
+            var numberString = string.Join("", doc.DocumentNode.SelectNodes("//dd/span").Select(node => node.InnerText));
+            return int.Parse(numberString);
+        }
     }
 }

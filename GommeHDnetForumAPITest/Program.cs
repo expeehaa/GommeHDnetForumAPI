@@ -15,8 +15,8 @@ namespace GommeHDnetForumAPITest
             var creds = CredentialsLoader.GetCredentials();
             var forum = new Forum(creds.Username, creds.Password);
 
+            Console.WriteLine(forum.GetOnlineUserCount().GetAwaiter().GetResult());
             //TestFunctionalities(forum);
-            TestMembersLists(forum);
             //AllUserAccountsBeforeId(forum, 202);
 
             Console.ReadKey();

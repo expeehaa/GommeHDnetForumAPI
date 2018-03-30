@@ -53,10 +53,18 @@ namespace GommeHDnetForumAPI
         /// Forum threads path equals to forum/threads/
         /// </summary>
         public const string ForumThreadsPath = ForumPath + "threads/";
-
-        public const string MembersListTypePath = MembersPath + "?type=";
-
+        
+        /// <summary>
+        /// Returns the members list path with appended type query
+        /// </summary>
+        /// <param name="type">The type of the members list</param>
+        /// <returns>String representing the members list path with specified type query.</returns>
         public static string GetMembersListTypePath(MembersListType type) 
-            => MembersListTypePath + type.ToString().ToLower();
+            => $"{MembersPath}?type={type.ToString().ToLower()}";
+
+        /// <summary>
+        /// Users online stats path equals to stats/users-online/
+        /// </summary>
+        public const string StatsUsersOnlinePath = "stats/users-online/";
     }
 }
