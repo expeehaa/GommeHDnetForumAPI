@@ -174,13 +174,15 @@ namespace GommeHDnetForumAPI
             var response = await _httpClient.GetAsync(addBaseUrl ? ForumPaths.BaseUrl + path : path).ConfigureAwait(false);
             return checkSuccess ? response.EnsureSuccessStatusCode() : response;
         }
-        
+
         /// <summary>
         /// Get all conversations.
         /// </summary>
+        /// <param name="startPage"></param>
+        /// <param name="pageCount"></param>
         /// <returns>Object containing all conversations the user had.</returns>
-        public async Task<ThreadCollection<ConversationInfo>> GetConversations() 
-            => await new ConversationsParser(this, 0, 0).ParseAsync().ConfigureAwait(false);
+        public async Task<ThreadCollection<ConversationInfo>> GetConversations(int startPage = 0, int pageCount = 0) 
+            => await new ConversationsParser(this, startPage, pageCount).ParseAsync().ConfigureAwait(false);
 
         /// <summary>
         /// Get main forum. WIP

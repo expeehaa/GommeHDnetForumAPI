@@ -17,6 +17,7 @@ namespace GommeHDnetForumAPITest
 
             Console.WriteLine(forum.GetOnlineUserCount().GetAwaiter().GetResult());
             //TestFunctionalities(forum);
+            TestConversations(forum);
             //AllUserAccountsBeforeId(forum, 202);
 
             Console.ReadKey();
