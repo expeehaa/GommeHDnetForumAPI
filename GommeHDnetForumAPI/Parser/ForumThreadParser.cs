@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Entities;
-using GommeHDnetForumAPI.DataModels.Exceptions;
+using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser
 {
