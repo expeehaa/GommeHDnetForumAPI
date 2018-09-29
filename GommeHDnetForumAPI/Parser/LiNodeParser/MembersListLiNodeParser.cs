@@ -16,7 +16,7 @@ namespace GommeHDnetForumAPI.Parser.LiNodeParser
         {
             var aNode = node.SelectSingleNode("./a");
             var aNodeClasses = aNode.GetAttributeValue("class", "").Split(" ");
-            var avatarClass = aNodeClasses.FirstOrDefault(c => Regex.IsMatch(c, "Av([0-9]+)s"));
+            var avatarClass = aNodeClasses.FirstOrDefault(c => Regex.IsMatch(c, "Av([0-9]+)s")) ?? "";
             if (string.IsNullOrWhiteSpace(avatarClass) || !long.TryParse(Regex.Match(avatarClass, "Av([0-9]+)s").Groups[1].Value, out var userId)) return null;
             var username = node.SelectSingleNode(".//div[@class='member']/h3[@class='username']")?.InnerText;
             if (string.IsNullOrWhiteSpace(username)) return null;
