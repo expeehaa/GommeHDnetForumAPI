@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <Authors>expeehaa</Authors>
     <Company></Company>
     <Description>Inofficial Gommehd.net Forum API for .NET Core</Description>
@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="CloudFlareUtilities" Version="1.2.0" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.8.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.8.8" />
   </ItemGroup>
 
 </Project>
