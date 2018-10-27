@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="CloudFlareUtilities" Version="1.2.0" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.8.8" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.8.9" />
   </ItemGroup>
 
 </Project>
