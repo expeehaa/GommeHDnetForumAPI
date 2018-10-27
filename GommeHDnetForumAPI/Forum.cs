@@ -216,7 +216,7 @@ namespace GommeHDnetForumAPI
         /// <param name="participants">Conversation participants as string[]</param>
         /// <returns>string containing the Url to creat a conversation.</returns>
         public string GetConversationCreationUrl(string[] participants) 
-            => $"{ForumPaths.ConversationsUrl}add?to={string.Join(", ", participants)}";
+            => $"{ForumPaths.ConversationsUrl}add?to={string.Join(",", participants)}";
 
         /// <summary>
         /// Create a new conversation
