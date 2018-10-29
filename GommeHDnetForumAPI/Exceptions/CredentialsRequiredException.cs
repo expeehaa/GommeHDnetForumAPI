@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GommeHDnetForumAPI.DataModels.Exceptions
+namespace GommeHDnetForumAPI.Exceptions
 {
     /// <inheritdoc />
     /// <summary>

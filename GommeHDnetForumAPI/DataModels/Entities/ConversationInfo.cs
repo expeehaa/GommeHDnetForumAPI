@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
-using GommeHDnetForumAPI.DataModels.Exceptions;
+using GommeHDnetForumAPI.Exceptions;
 using GommeHDnetForumAPI.Parser;
 using HtmlAgilityPack;
 

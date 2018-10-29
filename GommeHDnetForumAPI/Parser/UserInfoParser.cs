@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Entities;
-using GommeHDnetForumAPI.DataModels.Exceptions;
+using GommeHDnetForumAPI.Exceptions;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser

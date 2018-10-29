@@ -10,7 +10,7 @@ using CloudFlareUtilities;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Collections;
 using GommeHDnetForumAPI.DataModels.Entities;
-using GommeHDnetForumAPI.DataModels.Exceptions;
+using GommeHDnetForumAPI.Exceptions;
 using GommeHDnetForumAPI.Parser;
 using GommeHDnetForumAPI.Parser.LiNodeParser;
 using HtmlAgilityPack;

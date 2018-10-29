@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace GommeHDnetForumAPI.DataModels.Exceptions
+namespace GommeHDnetForumAPI.Exceptions
 {
     public class UserNotFoundException : Exception
     {

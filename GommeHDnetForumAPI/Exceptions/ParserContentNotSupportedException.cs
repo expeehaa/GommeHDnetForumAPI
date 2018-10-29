@@ -1,7 +1,7 @@
 ﻿using System;
 using GommeHDnetForumAPI.Parser;
 
-namespace GommeHDnetForumAPI.DataModels.Exceptions
+namespace GommeHDnetForumAPI.Exceptions
 {
     public class ParserContentNotSupportedException : Exception
     {
