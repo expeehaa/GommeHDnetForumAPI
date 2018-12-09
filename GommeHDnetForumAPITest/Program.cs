@@ -66,6 +66,21 @@ namespace GommeHDnetForumAPITest
             var con1 = cons.First();
             con1.DownloadMessagesAsync().GetAwaiter().GetResult();
             Console.WriteLine(con1);
+            var username = Console.ReadLine();
+            var user = forum.GetUserInfo(username).GetAwaiter().GetResult();
+            if (user == null)
+            {
+                Console.WriteLine("User not found!");
+                return;
+            }
+
+            var con2 = cons.FirstOrDefault(c => c.Title.Equals("test", StringComparison.OrdinalIgnoreCase) && c.Members.Any(m => m.Id == user.Id));
+            if (con2 == null)
+                con2 = forum.CreateConversation(new[] { user }.ToUserCollection(), "test", "A simple test message.").GetAwaiter().GetResult();
+            else
+                con2.Reply("Testantwort").GetAwaiter().GetResult();
+            
+
 
             Console.ReadLine();
         }

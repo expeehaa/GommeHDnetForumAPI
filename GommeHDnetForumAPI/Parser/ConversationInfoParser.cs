@@ -73,7 +73,7 @@ namespace GommeHDnetForumAPI.Parser
                 let userurl = a.GetAttributeValue("href", "")
                 let userid = long.Parse(userurl.Split('.')[userurl.Split('.').Length - 1].TrimEnd('/'))
                 select new UserInfo(Forum, userid));
-            var answers = uint.Parse(container.SelectSingleNode("//div[@class='secondaryContent']/div[@class='pairsJustified']").SelectSingleNode("//dl/dt[@]").InnerText);
+            var answers = uint.Parse(container.SelectNodes("//div[@class='secondaryContent']/div[@class='pairsJustified']/dl")[1].InnerText);
 
             return new ConversationInfo(Forum, id, title, author, recipients, answers);
         }
