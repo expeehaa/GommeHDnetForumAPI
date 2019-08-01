@@ -16,9 +16,9 @@ namespace GommeHDnetForumAPITest
             var forum = new Forum(creds.Username, creds.Password);
 
             Console.WriteLine(forum.GetOnlineUserCount().GetAwaiter().GetResult());
-            //TestFunctionalities(forum);
-            TestConversations(forum);
-            //AllUserAccountsBeforeId(forum, 202);
+            TestFunctionalities(forum);
+            //TestConversations(forum);
+            //AllUserAccountsBeforeId(forum, 102);
 
             Console.ReadKey();
         }
@@ -26,11 +26,20 @@ namespace GommeHDnetForumAPITest
 
         public static void TestFunctionalities(Forum forum)
         {
-            TestUserInfoParsing(forum);
-            TestConversations(forum);
-            TestForumThreads(forum);
-            TestMembersLists(forum);
-        }
+			//TestUserInfoParsing(forum);
+			//TestConversations(forum);
+			//TestForumThreads(forum);
+			//TestMembersLists(forum);
+			TestConversationReply(forum);
+		}
+
+		private static void TestConversationReply(Forum forum) {
+			var conversations = forum.GetConversations(1, 1).GetAwaiter().GetResult();
+			var con = conversations.First(c => c.Title.Equals("Betaverify"));
+			var success = con.Reply("Testnachricht").GetAwaiter().GetResult();
+
+			Console.ReadLine();
+		}
 
         private static void TestForumThreads(Forum forum)
         {
@@ -74,11 +83,11 @@ namespace GommeHDnetForumAPITest
                 return;
             }
 
-            var con2 = cons.FirstOrDefault(c => c.Title.Equals("test", StringComparison.OrdinalIgnoreCase) && c.Members.Any(m => m.Id == user.Id));
-            if (con2 == null)
-                con2 = forum.CreateConversation(new[] { user }.ToUserCollection(), "test", "A simple test message.").GetAwaiter().GetResult();
-            else
-                con2.Reply("Testantwort").GetAwaiter().GetResult();
+            //var con2 = cons.FirstOrDefault(c => c.Title.Equals("test", StringComparison.OrdinalIgnoreCase) && c.Members.Any(m => m.Id == user.Id));
+            //if (con2 == null)
+            //    con2 = forum.CreateConversation(new[] { user }.ToUserCollection(), "test", "A simple test message.").GetAwaiter().GetResult();
+            //else
+            //    con2.Reply("Testantwort").GetAwaiter().GetResult();
             
 
 
