@@ -111,6 +111,6 @@ namespace GommeHDnetForumAPI.DataModels.Entities {
 		}
 
 		public override string ToString()
-			=> $"Id: {Id} | Title: \"{Title}\" | Author: \"{Author}\" | Answers: {AnswerCount} | Members: ({Members}) | Messages: ({string.Join(", ", Messages.Select(c => $"({c.ToString()})"))})";
+			=> $"Id: {Id} | Title: \"{Title}\" | Author: \"{Author}\" | Answers: {AnswerCount} | Members: ({Members}) | Messages: ({string.Join(", ", Messages.Select(c => $"({c})"))})";
 	}
 }

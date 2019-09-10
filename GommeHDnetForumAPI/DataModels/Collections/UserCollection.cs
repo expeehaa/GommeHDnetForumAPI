@@ -20,6 +20,6 @@ namespace GommeHDnetForumAPI.DataModels.Collections {
 			=> ToString(", ");
 
 		public string ToString(string separator)
-			=> string.Join(separator, this.Select(u => $"({u.ToString()})"));
+			=> string.Join(separator, this.Select(u => $"({u})"));
 	}
 }
