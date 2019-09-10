@@ -1,16 +1,14 @@
-﻿namespace GommeHDnetForumAPI.DataModels.Entities
-{
-    public class IndexedEntity
-    {
-        public Forum Forum { get; }
-        public long Id { get; }
+﻿namespace GommeHDnetForumAPI.DataModels.Entities {
+	public class IndexedEntity {
+		public Forum Forum { get; }
+		public long  Id    { get; }
 
-        internal IndexedEntity(Forum forum, long id) {
-            Forum = forum;
-            Id = id;
-        }
+		internal IndexedEntity(Forum forum, long id) {
+			Forum = forum;
+			Id    = id;
+		}
 
-        public override string ToString()
-            => $"Id: {Id}";
-    }
+		public override string ToString()
+			=> $"Id: {Id}";
+	}
 }

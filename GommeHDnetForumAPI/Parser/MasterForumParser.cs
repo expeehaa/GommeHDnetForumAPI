@@ -9,40 +9,38 @@ using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
 using GommeHDnetForumAPI.Parser.LiNodeParser;
 using HtmlAgilityPack;
 
-namespace GommeHDnetForumAPI.Parser
-{
-    internal class MasterForumParser : Parser<MasterForumInfo>
-    {
-        public MasterForumParser(Forum forum) : base(forum, new BasicUrl(ForumPaths.ForumPath)) { }
+namespace GommeHDnetForumAPI.Parser {
+	internal class MasterForumParser : Parser<MasterForumInfo> {
+		public MasterForumParser(Forum forum) : base(forum, new BasicUrl(ForumPaths.ForumPath)) { }
 
-        public override async Task<MasterForumInfo> ParseAsync() {
-            var doc = await GetDoc().ConfigureAwait(false);
-            var categories = new List<MasterForumCategoryInfo>();
+		public override async Task<MasterForumInfo> ParseAsync() {
+			var doc        = await GetDoc().ConfigureAwait(false);
+			var categories = new List<MasterForumCategoryInfo>();
 
-            foreach (var li in doc.DocumentNode.SelectNodes("//ol[@id='forums']/li")) {
-                var nullableid = GetIdFromNodeClass(li);
-                if (nullableid == null) continue;
-                var id = nullableid.Value;
-                var titlenode = li.SelectSingleNode(".//div[@class='categoryText']/h3/a");
-                if (titlenode == null) continue;
-                var title = WebUtility.HtmlDecode(titlenode.InnerText);
-                var href = titlenode.GetAttributeValue("href", "");
-                var description = WebUtility.HtmlDecode(doc.GetElementbyId($"nodeDescription-{id}")?.InnerText ?? string.Empty);
-                var mfci = new MasterForumCategoryInfo(Forum, id, title, description, href);
-                var sflinodes = li.SelectNodes(".//ol[@class='nodeList']/li");
-                mfci.SubForums = sflinodes != null && sflinodes.Any() ? new SubForumLiNodeParser(Forum, sflinodes, mfci).ParseAsync().GetAwaiter().GetResult() : new List<ISubForum>();
-                categories.Add(mfci);
-            }
+			foreach (var li in doc.DocumentNode.SelectNodes("//ol[@id='forums']/li")) {
+				var nullableid = GetIdFromNodeClass(li);
+				if (nullableid == null) continue;
+				var id        = nullableid.Value;
+				var titlenode = li.SelectSingleNode(".//div[@class='categoryText']/h3/a");
+				if (titlenode == null) continue;
+				var title       = WebUtility.HtmlDecode(titlenode.InnerText);
+				var href        = titlenode.GetAttributeValue("href", "");
+				var description = WebUtility.HtmlDecode(doc.GetElementbyId($"nodeDescription-{id}")?.InnerText ?? string.Empty);
+				var mfci        = new MasterForumCategoryInfo(Forum, id, title, description, href);
+				var sflinodes   = li.SelectNodes(".//ol[@class='nodeList']/li");
+				mfci.SubForums = sflinodes != null && sflinodes.Any() ? new SubForumLiNodeParser(Forum, sflinodes, mfci).ParseAsync().GetAwaiter().GetResult() : new List<ISubForum>();
+				categories.Add(mfci);
+			}
 
-            return new MasterForumInfo(Forum, categories);
-        }
+			return new MasterForumInfo(Forum, categories);
+		}
 
-        private static long? GetIdFromNodeClass(HtmlNode node) {
-            var classes = node.GetAttributeValue("class", "");
-            var regex = Regex.Match(classes, "node_(\\d+)");
-            return Regex.IsMatch(classes, "node_(\\d+)")
-                ? (long?) long.Parse(regex.Groups[1].Value)
-                : null;
-        }
-    }
+		private static long? GetIdFromNodeClass(HtmlNode node) {
+			var classes = node.GetAttributeValue("class", "");
+			var regex   = Regex.Match(classes, "node_(\\d+)");
+			return Regex.IsMatch(classes, "node_(\\d+)")
+				? (long?) long.Parse(regex.Groups[1].Value)
+				: null;
+		}
+	}
 }
