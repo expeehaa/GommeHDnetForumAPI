@@ -49,7 +49,6 @@ namespace GommeHDnetForumAPI.DataModels.Entities
             Location = nInfo.Location;
             Status = nInfo.Status;
             Gender = nInfo.Gender;
-            //Verified = nInfo.Verified;
             Trophies = nInfo.Trophies;
             UserTitle = nInfo.UserTitle;
         }
