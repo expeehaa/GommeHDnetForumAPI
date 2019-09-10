@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.DataModels.Entities;
 using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
-using GommeHDnetForumAPI.Exceptions;
 using GommeHDnetForumAPI.Parser.LiNodeParser;
 using HtmlAgilityPack;
 
