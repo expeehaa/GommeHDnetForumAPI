@@ -2,25 +2,10 @@
 
 namespace GommeHDnetForumAPI.DataModels.Entities {
 	public class SubLink : IndexedEntity, ISubForum {
-		/// <summary>
-		/// Title of the SubLink
-		/// </summary>
-		public string Title { get; }
-
-		/// <summary>
-		/// Description of the SubLink
-		/// </summary>
+		public string Title       { get; }
 		public string Description { get; }
-
-		/// <summary>
-		/// Parent implementing IForum
-		/// </summary>
-		public IForum Parent { get; }
-
-		/// <summary>
-		/// Urlpath to sublink
-		/// </summary>
-		public string UrlPath => $"{ForumPaths.LinkForumsPath}{Id}/";
+		public IForum Parent      { get; }
+		public string UrlPath     => $"{ForumPaths.LinkForumsPath}{Id}/";
 
 		internal SubLink(Forum forum, long id, IForum parent, string title, string description) : base(forum, id) {
 			Title       = title;
