@@ -23,7 +23,7 @@ namespace GommeHDnetForumAPI.Parser {
 
 			if (_startPage < 1) _startPage = 1;
 			if (pages < _startPage) return new ThreadCollection<ConversationInfo>();
-			var pageMax = _pageCount <= 0 ? pages : (_startPage + _pageCount - 1 >= pages ? pages : _startPage + _pageCount - 1);
+			var pageMax = _pageCount <= 0 ? pages : _startPage + _pageCount - 1 >= pages ? pages : _startPage + _pageCount - 1;
 
 			var liNodes = new List<HtmlNode>();
 			for (var i = _startPage; i <= pageMax; i++) {

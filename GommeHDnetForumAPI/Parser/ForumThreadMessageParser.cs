@@ -22,7 +22,7 @@ namespace GommeHDnetForumAPI.Parser {
 			var doc   = await GetDoc().ConfigureAwait(false);
 			var pages = doc.DocumentNode.SelectSingleNode("//div[@class='PageNav']")?.GetAttributeValue("data-last", 0) ?? 1;
 			if (pages < _startPage) return new List<ForumPost>();
-			var pageMax = _pageCount <= 0 ? pages : (_startPage + _pageCount - 1 >= pages ? pages : _startPage + _pageCount - 1);
+			var pageMax = _pageCount <= 0 ? pages : _startPage + _pageCount - 1 >= pages ? pages : _startPage + _pageCount - 1;
 
 			var liNodes = new List<HtmlNode>();
 			//Parallel.For(_startPage, pageMax + 1, async i 
