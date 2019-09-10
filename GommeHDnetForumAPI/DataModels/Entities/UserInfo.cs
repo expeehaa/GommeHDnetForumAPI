@@ -14,7 +14,7 @@ namespace GommeHDnetForumAPI.DataModels.Entities
         public string Location { get; internal set; }
         public string Status { get; internal set; }
         public Gender Gender { get; internal set; } = Gender.Unknown;
-        public bool? Verified => string.IsNullOrWhiteSpace(Username) ? null : (bool?) (Username.Length < 16);
+        public bool? Verified => string.IsNullOrWhiteSpace(Username) ? null : (bool?) (Username.Length <= 16);
         public int? Trophies { get; internal set; }
         public string UserTitle { get; internal set; }
 
