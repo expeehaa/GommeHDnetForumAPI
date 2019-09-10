@@ -9,16 +9,8 @@ using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {
 	internal class ConversationMessageParser : Parser<IEnumerable<ConversationMessage>> {
-		/// <summary>
-		/// Start page for parser
-		/// </summary>
-		private readonly int _startPage;
-
-		/// <summary>
-		/// Page count
-		/// </summary>
-		private readonly int _pageCount;
-
+		private readonly int              _startPage;
+		private readonly int              _pageCount;
 		private readonly ConversationInfo _parent;
 
 		public ConversationMessageParser(Forum forum, ConversationInfo parent, int startPage, int pageCount) : base(forum, new BasicUrl(parent.UrlPath)) {

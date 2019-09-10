@@ -8,9 +8,6 @@ using GommeHDnetForumAPI.Parser.LiNodeParser;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {
-	/// <summary>
-	/// Parse conversations from https://gommehd.net/forum/conversations/
-	/// </summary>
 	internal class ConversationsParser : Parser<ThreadCollection<ConversationInfo>> {
 		private          int _startPage;
 		private readonly int _pageCount;

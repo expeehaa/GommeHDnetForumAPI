@@ -20,29 +20,11 @@ namespace GommeHDnetForumAPI {
 		private string _username;
 		private string _password;
 
-		/// <summary>
-		/// True, if neither username nor password are null, empty or whitespace.
-		/// </summary>
-		public bool HasCredentials => !string.IsNullOrWhiteSpace(_username) && !string.IsNullOrWhiteSpace(_password);
+		public bool            HasCredentials => !string.IsNullOrWhiteSpace(_username) && !string.IsNullOrWhiteSpace(_password);
+		public bool            LoggedIn       => SelfUser != null;
+		public UserInfo        SelfUser       { get; private set; }
+		public MasterForumInfo MasterForum    { get; private set; }
 
-		/// <summary>
-		/// True if login was successfull.
-		/// </summary>
-		public bool LoggedIn => SelfUser != null;
-
-		/// <summary>
-		/// UserInfo instance of the logged in user.
-		/// </summary>
-		public UserInfo SelfUser { get; private set; }
-
-		/// <summary>
-		/// Forum info of the top level forum located at https://www.gommehd.net/forum/
-		/// </summary>
-		public MasterForumInfo MasterForum { get; private set; }
-
-		/// <summary>
-		/// Set or get the User-Agent header for all HttpRequests.
-		/// </summary>
 		public string UserAgent {
 			get => _httpClient.DefaultRequestHeaders.UserAgent.ToString();
 			set => _httpClient.DefaultRequestHeaders.Add("User-Agent", value);
@@ -53,27 +35,13 @@ namespace GommeHDnetForumAPI {
 		private ClearanceHandler  _clearanceHandler;
 		private HttpClient        _httpClient;
 
-		/// <inheritdoc />
-		/// <summary>
-		/// Constructor without credentials
-		/// </summary>
 		public Forum() : this(null, null) { }
 
-		/// <summary>
-		/// Constructor with credentials
-		/// </summary>
-		/// <param name="username"></param>
-		/// <param name="password"></param>
 		public Forum(string username, string password) {
 			InitHttpClient();
 			ChangeCredentials(username, password).GetAwaiter().GetResult();
 		}
 
-		/// <summary>
-		/// Change credentials and reload login session.
-		/// </summary>
-		/// <param name="username">Username</param>
-		/// <param name="password">Password</param>
 		public async Task<bool> ChangeCredentials(string username, string password) {
 			_username = username;
 			_password = password;
@@ -85,9 +53,6 @@ namespace GommeHDnetForumAPI {
 			return true;
 		}
 
-		/// <summary>
-		/// Initiate HttpClient
-		/// </summary>
 		private void InitHttpClient() {
 			ResetCookies();
 			_httpClientHandler = new HttpClientHandler {
@@ -111,10 +76,6 @@ namespace GommeHDnetForumAPI {
 			_cookieContainer = new CookieContainer();
 		}
 
-		/// <summary>
-		/// Login method
-		/// </summary>
-		/// <returns>bool indicating wether login was successful or not</returns>
 		private async Task<bool> Login() {
 			if (!HasCredentials) throw new CredentialsRequiredException();
 			var hrm = await GetData("login").ConfigureAwait(false);
@@ -146,9 +107,9 @@ namespace GommeHDnetForumAPI {
 		/// <summary>
 		/// HTTP post request to forum without login routing.
 		/// </summary>
-		/// <param name="path">Path after ForumPaths.BaseUrl</param>
-		/// <param name="body">ForumUrlEncoded body</param>
-		/// <param name="checkSuccess">Wether to call EnsureSuccessStatusCode or not on response</param>
+		/// <param name="path">Path after ForumPaths.BaseUrl.</param>
+		/// <param name="body">ForumUrlEncoded body.</param>
+		/// <param name="checkSuccess">Calls EnsureSuccessStatusCode on the response if true.</param>
 		/// <exception cref="HttpRequestException">Thrown if status code != 200</exception>
 		/// <returns>HttpResponseMessage</returns>
 		public async Task<HttpResponseMessage> PostData(string path, List<KeyValuePair<string, string>> body = null, bool checkSuccess = true) {
@@ -161,9 +122,9 @@ namespace GommeHDnetForumAPI {
 		/// <summary>
 		/// HTTP get request to forum
 		/// </summary>
-		/// <param name="path">Path (after ForumPaths.BaseUrl)</param>
-		/// <param name="checkSuccess">Wether to call EnsureSuccessStatusCode or not on response</param>
-		/// <param name="addBaseUrl">If true ForumPaths.BaseUrl is prepended to <paramref name="path"/></param>
+		/// <param name="path">Path after ForumPaths.BaseUrl</param>
+		/// <param name="checkSuccess">Calls EnsureSuccessStatusCode on the response if true.</param>
+		/// <param name="addBaseUrl">Prepends ForumPaths.BaseUrl to <paramref name="path"/> if true.</param>
 		/// <exception cref="HttpRequestException">Thrown if status code != 200</exception>
 		/// <returns>HttpResponseMessage</returns>
 		public async Task<HttpResponseMessage> GetData(string path, bool checkSuccess = true, bool addBaseUrl = true) {
@@ -171,57 +132,37 @@ namespace GommeHDnetForumAPI {
 			return checkSuccess ? response.EnsureSuccessStatusCode() : response;
 		}
 
-		/// <summary>
-		/// Get all conversations.
-		/// </summary>
-		/// <param name="startPage"></param>
-		/// <param name="pageCount"></param>
-		/// <returns>Object containing all conversations the user had.</returns>
 		public async Task<ThreadCollection<ConversationInfo>> GetConversations(int startPage = 0, int pageCount = 0)
 			=> await new ConversationsParser(this, startPage, pageCount).ParseAsync().ConfigureAwait(false);
 
-		/// <summary>
-		/// Get main forum. WIP
-		/// </summary>
-		/// <returns>Main forum</returns>
 		public async Task<HttpResponseMessage> GetMainForum()
 			=> await GetData("forum").ConfigureAwait(false);
 
 		/// <summary>
-		/// Create a new conversation
+		/// Create a new conversation.
 		/// </summary>
-		/// <param name="participants">Conversation participants as UserCollection</param>
-		/// <param name="title">Title of the conversation</param>
-		/// <param name="message">First message</param>
-		/// <param name="openInvite">Bool indicating wether participants can invite others or not</param>
-		/// <returns>ConversationInfo corresponding to the created conversation.</returns>
+		/// <param name="participants">Conversation participants.</param>
+		/// <param name="title">Desired conversation title.</param>
+		/// <param name="message">Message to send.</param>
+		/// <param name="openInvite">Participants may invite other users to the conversation if true.</param>
+		/// <returns>ConversationInfo describing the created conversation.</returns>
 		public async Task<ConversationInfo> CreateConversation(UserCollection participants, string title, string message, bool openInvite = false)
 			=> await CreateConversation((from r in participants select r.Username).ToArray(), title, message, openInvite).ConfigureAwait(false);
 
-		/// <summary>
-		/// Returns an Url as a string to create a new conversation with the given <paramref name="participants"/> in a browser window.
-		/// </summary>
-		/// <param name="participants">Conversation participants as UserCollection</param>
-		/// <returns>string containing the Url to creat a conversation.</returns>
 		public string GetConversationCreationUrl(UserCollection participants)
 			=> GetConversationCreationUrl(participants.Select(p => p.Username).ToArray());
 
-		/// <summary>
-		/// Returns an Url as a string to create a new conversation with the given <paramref name="participants"/> in a browser window.
-		/// </summary>
-		/// <param name="participants">Conversation participants as string[]</param>
-		/// <returns>string containing the Url to creat a conversation.</returns>
 		public string GetConversationCreationUrl(string[] participants)
 			=> $"{ForumPaths.ConversationsUrl}add?to={string.Join(",", participants)}";
 
 		/// <summary>
-		/// Create a new conversation
+		/// Create a new conversation.
 		/// </summary>
-		/// <param name="participants">Conversation participants as string[]</param>
-		/// <param name="title">Title of the conversation</param>
-		/// <param name="message">First message</param>
-		/// <param name="openInvite">Bool indicating wether participants can invite others or not</param>
-		/// <returns>ConversationInfo corresponding to the created conversation.</returns>
+		/// <param name="participants">Conversation participants.</param>
+		/// <param name="title">Desired conversation title.</param>
+		/// <param name="message">Message to send.</param>
+		/// <param name="openInvite">Participants may invite other users to the conversation if true.</param>
+		/// <returns>ConversationInfo describing the created conversation.</returns>
 		public async Task<ConversationInfo> CreateConversation(string[] participants, string title, string message, bool openInvite = false) {
 			if (!LoggedIn) throw new LoginRequiredException("Log in to create a new conversation!");
 			var h   = await GetData($"{ForumPaths.ConversationsPath}add").ConfigureAwait(false);
@@ -240,11 +181,6 @@ namespace GommeHDnetForumAPI {
 			return await new ConversationInfoParser(this, await hrm.Content.ReadAsStringAsync().ConfigureAwait(false)).ParseAsync().ConfigureAwait(false);
 		}
 
-		/// <summary>
-		/// Get information about the user with the specified ID.
-		/// </summary>
-		/// <param name="userId">The ID of the user</param>
-		/// <returns>Corresponding UserInfo object to the <paramref name="userId"/> or null.</returns>
 		public async Task<UserInfo> GetUserInfo(long userId)
 			=> await new UserInfoParser(this, userId).ParseAsync().ConfigureAwait(false);
 
@@ -267,11 +203,6 @@ namespace GommeHDnetForumAPI {
 			}
 		}
 
-		/// <summary>
-		/// Returns a UserCollection object containing all UserInfo's from the forum's members list of the specified type.
-		/// </summary>
-		/// <param name="type"></param>
-		/// <returns></returns>
 		public async Task<UserCollection> GetMembersList(MembersListType type) {
 			var hrm = await GetData(ForumPaths.GetMembersListTypePath(type)).ConfigureAwait(false);
 			var doc = new HtmlDocument();
@@ -281,10 +212,6 @@ namespace GommeHDnetForumAPI {
 			return users.ToUserCollection();
 		}
 
-		/// <summary>
-		/// Returns the amount of users currently being on the server.
-		/// </summary>
-		/// <returns></returns>
 		public async Task<int> GetOnlineUserCount() {
 			var hrm = await GetData(ForumPaths.StatsUsersOnlinePath).ConfigureAwait(false);
 			var doc = new HtmlDocument();

@@ -65,7 +65,6 @@ namespace GommeHDnetForumAPI.Parser {
 			var gotTrophies = int.TryParse(infos.FirstOrDefault(p => p.Key.ToLower().Contains("erfolge")).Value?.InnerText.Replace(".", ""),      out var trophies);
 			var location    = WebUtility.HtmlDecode(infos.FirstOrDefault(p => p.Key.ToLower().Contains("ort")).Value?.FirstChild?.InnerText.Trim() ?? "");
 			var gender      = GenderParser.Parse(infos.FirstOrDefault(p => p.Value.GetAttributeValue("itemprop", "").Equals("gender", StringComparison.OrdinalIgnoreCase)).Value?.InnerText);
-			//var verified = doc.GetElementbyId("statistic").SelectSingleNode("./div[@class='']/div[@class='stat-table']") == null;
 			var maintextnode = profilePage.SelectSingleNode(".//div[@class='mainText secondaryContent']");
 			var customTitleNode = maintextnode.ChildAttributes("class").FirstOrDefault(ha
 																							=> ha.Value.StartsWith("custom-title-", StringComparison.OrdinalIgnoreCase))?.OwnerNode;

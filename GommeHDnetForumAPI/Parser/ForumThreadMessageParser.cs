@@ -8,16 +8,8 @@ using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {
 	internal class ForumThreadMessageParser : Parser<IEnumerable<ForumPost>> {
-		/// <summary>
-		/// Start page for parser
-		/// </summary>
-		private readonly int _startPage;
-
-		/// <summary>
-		/// Page count
-		/// </summary>
-		private readonly int _pageCount;
-
+		private readonly int         _startPage;
+		private readonly int         _pageCount;
 		private readonly ForumThread _parent;
 
 		public ForumThreadMessageParser(Forum forum, ForumThread parent, int startPage, int pageCount) : base(forum, new BasicUrl(parent.UrlPath)) {
