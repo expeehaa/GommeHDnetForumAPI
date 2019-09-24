@@ -1,4 +1,4 @@
-﻿namespace GommeHDnetForumAPI.DataModels.Entities {
+﻿namespace GommeHDnetForumAPI.Models.Entities {
 	public class ThreadPrefix : IndexedEntity {
 		public string Name { get; }
 

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.Parser;
 
-namespace GommeHDnetForumAPI.DataModels.Entities {
+namespace GommeHDnetForumAPI.Models.Entities {
 	public class UserInfo : IndexedEntity {
 		public string    Username       { get; internal set; }
 		public string    AvatarUrl      { get; internal set; }

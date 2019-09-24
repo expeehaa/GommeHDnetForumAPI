@@ -1,4 +1,4 @@
-﻿using GommeHDnetForumAPI.DataModels;
+﻿using GommeHDnetForumAPI.Models;
 
 namespace GommeHDnetForumAPI {
 	public static class ForumPaths {

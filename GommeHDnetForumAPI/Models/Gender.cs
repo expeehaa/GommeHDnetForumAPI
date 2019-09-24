@@ -1,4 +1,4 @@
-﻿namespace GommeHDnetForumAPI.DataModels {
+﻿namespace GommeHDnetForumAPI.Models {
 	public enum Gender {
 		Unknown,
 		Male,

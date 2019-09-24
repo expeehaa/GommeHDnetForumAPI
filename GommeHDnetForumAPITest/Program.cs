@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using GommeHDnetForumAPI;
-using GommeHDnetForumAPI.DataModels;
-using GommeHDnetForumAPI.DataModels.Collections;
-using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.Models;
+using GommeHDnetForumAPI.Models.Collections;
+using GommeHDnetForumAPI.Models.Entities;
 
 namespace GommeHDnetForumAPITest
 {

@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels;
-using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.Models;
+using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {

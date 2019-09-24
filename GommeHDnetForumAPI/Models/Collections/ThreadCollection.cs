@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+using GommeHDnetForumAPI.Models.Entities.Interfaces;
 
-namespace GommeHDnetForumAPI.DataModels.Collections {
+namespace GommeHDnetForumAPI.Models.Collections {
 	public class ThreadCollection<T> : List<T> where T : IThread {
 		public ThreadCollection() { }
 

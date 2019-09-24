@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels;
-using GommeHDnetForumAPI.DataModels.Entities;
 using GommeHDnetForumAPI.Exceptions;
+using GommeHDnetForumAPI.Models;
+using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {

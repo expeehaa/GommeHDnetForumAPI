@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.Models.Entities;
 
-namespace GommeHDnetForumAPI.DataModels.Collections {
+namespace GommeHDnetForumAPI.Models.Collections {
 	public class UserCollection : List<UserInfo> {
 		public UserCollection() { }
 

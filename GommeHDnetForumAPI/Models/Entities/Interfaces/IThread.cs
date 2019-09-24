@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GommeHDnetForumAPI.DataModels.Entities.Interfaces {
+namespace GommeHDnetForumAPI.Models.Entities.Interfaces {
 	public interface IThread<out T> : IThread where T : IPost {
 		IEnumerable<T> Messages { get; }
 	}

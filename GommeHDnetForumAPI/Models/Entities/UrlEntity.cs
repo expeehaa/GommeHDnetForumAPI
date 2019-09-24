@@ -1,6 +1,6 @@
-﻿using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+﻿using GommeHDnetForumAPI.Models.Entities.Interfaces;
 
-namespace GommeHDnetForumAPI.DataModels.Entities {
+namespace GommeHDnetForumAPI.Models.Entities {
 	public class UrlEntity : IUrlPath {
 		public Forum  Forum   { get; }
 		public string UrlPath { get; }

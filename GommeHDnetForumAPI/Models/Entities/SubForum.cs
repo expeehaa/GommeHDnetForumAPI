@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+using GommeHDnetForumAPI.Models.Entities.Interfaces;
 using GommeHDnetForumAPI.Parser;
 
-namespace GommeHDnetForumAPI.DataModels.Entities {
+namespace GommeHDnetForumAPI.Models.Entities {
 	public class SubForum : IndexedEntity, ISubForum {
 		public string                    Title         { get; private set; }
 		public string                    Description   { get; private set; }

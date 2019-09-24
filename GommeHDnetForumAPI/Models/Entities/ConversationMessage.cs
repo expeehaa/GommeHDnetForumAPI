@@ -1,6 +1,6 @@
-﻿using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+﻿using GommeHDnetForumAPI.Models.Entities.Interfaces;
 
-namespace GommeHDnetForumAPI.DataModels.Entities {
+namespace GommeHDnetForumAPI.Models.Entities {
 	public class ConversationMessage : IndexedEntity, IPost<ConversationInfo> {
 		public UserInfo         Author  { get; }
 		public string           Content { get; }

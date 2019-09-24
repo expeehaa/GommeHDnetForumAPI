@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels.Collections;
-using GommeHDnetForumAPI.DataModels.Entities;
 using GommeHDnetForumAPI.Exceptions;
+using GommeHDnetForumAPI.Models.Collections;
+using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {

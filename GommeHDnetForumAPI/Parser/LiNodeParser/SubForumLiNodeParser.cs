@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using GommeHDnetForumAPI.DataModels.Entities;
-using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+using GommeHDnetForumAPI.Models.Entities;
+using GommeHDnetForumAPI.Models.Entities.Interfaces;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels;
-using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.Models;
+using GommeHDnetForumAPI.Models.Entities;
 using GommeHDnetForumAPI.Parser.LiNodeParser;
 using HtmlAgilityPack;
 

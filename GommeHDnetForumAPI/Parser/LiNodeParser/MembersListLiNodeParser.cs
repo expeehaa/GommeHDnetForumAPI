@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {

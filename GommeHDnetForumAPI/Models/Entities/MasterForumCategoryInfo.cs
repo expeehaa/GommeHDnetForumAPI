@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+using GommeHDnetForumAPI.Models.Entities.Interfaces;
 
-namespace GommeHDnetForumAPI.DataModels.Entities {
+namespace GommeHDnetForumAPI.Models.Entities {
 	public class MasterForumCategoryInfo : IndexedEntity, IForum {
 		public string                 Title       { get; }
 		public string                 Description { get; }

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.Parser;
 
-namespace GommeHDnetForumAPI.DataModels.Entities {
+namespace GommeHDnetForumAPI.Models.Entities {
 	public class MasterForumInfo : UrlEntity {
 		public IEnumerable<MasterForumCategoryInfo> Categories   { get; private set; }
 		public IEnumerable<SubForum>                SubForums    => Categories?.SelectMany(c => c.RealSubForums).ToList();

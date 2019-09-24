@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels;
 using GommeHDnetForumAPI.Exceptions;
+using GommeHDnetForumAPI.Models;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {

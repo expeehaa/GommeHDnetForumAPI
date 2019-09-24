@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.Models.Entities;
 
-namespace GommeHDnetForumAPI.DataModels.Collections {
+namespace GommeHDnetForumAPI.Models.Collections {
 	public static class CollectionExtensions {
 		public static IEnumerable<ForumThread> FilterByPrefix(this IEnumerable<ForumThread> threads, ThreadPrefix prefix)
 			=> prefix.Id == 0 ? threads : threads.Where(ft => ft.Prefix.Id == prefix.Id);

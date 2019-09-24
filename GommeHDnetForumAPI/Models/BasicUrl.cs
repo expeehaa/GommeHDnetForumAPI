@@ -1,4 +1,4 @@
-﻿namespace GommeHDnetForumAPI.DataModels {
+﻿namespace GommeHDnetForumAPI.Models {
 	public class BasicUrl {
 		public string Url { get; set; }
 

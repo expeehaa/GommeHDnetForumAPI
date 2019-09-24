@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using GommeHDnetForumAPI.DataModels.Collections;
-using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
 using GommeHDnetForumAPI.Exceptions;
+using GommeHDnetForumAPI.Models.Collections;
+using GommeHDnetForumAPI.Models.Entities.Interfaces;
 using GommeHDnetForumAPI.Parser;
 using HtmlAgilityPack;
 
-namespace GommeHDnetForumAPI.DataModels.Entities {
+namespace GommeHDnetForumAPI.Models.Entities {
 	public class ConversationInfo : IndexedEntity, IThread<ConversationMessage> {
 		public string                           Title       { get; }
 		public UserInfo                         Author      { get; }

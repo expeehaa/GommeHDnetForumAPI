@@ -1,6 +1,6 @@
-﻿using GommeHDnetForumAPI.DataModels.Entities.Interfaces;
+﻿using GommeHDnetForumAPI.Models.Entities.Interfaces;
 
-namespace GommeHDnetForumAPI.DataModels.Entities {
+namespace GommeHDnetForumAPI.Models.Entities {
 	public class SubLink : IndexedEntity, ISubForum {
 		public string Title       { get; }
 		public string Description { get; }

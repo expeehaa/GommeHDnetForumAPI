@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using GommeHDnetForumAPI.DataModels.Collections;
-using GommeHDnetForumAPI.DataModels.Entities;
+using GommeHDnetForumAPI.Models.Collections;
+using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {

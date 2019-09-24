@@ -1,4 +1,4 @@
-﻿namespace GommeHDnetForumAPI.DataModels.Entities {
+﻿namespace GommeHDnetForumAPI.Models.Entities {
 	public class IndexedEntity {
 		public Forum Forum { get; }
 		public long  Id    { get; }
