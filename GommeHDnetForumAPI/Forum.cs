@@ -81,7 +81,7 @@ namespace GommeHDnetForumAPI {
 			var hrm = await GetData("login").ConfigureAwait(false);
 			var doc = new HtmlDocument();
 			doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
-			var csrf = doc.DocumentNode.SelectSingleNode("//input[@name='_csrf']")?.GetAttributeValue("value", "");
+			var csrf = doc.DocumentNode.GetInputValueByName("_csrf");
 
 			if (string.IsNullOrWhiteSpace(csrf)) return false;
 
@@ -168,7 +168,7 @@ namespace GommeHDnetForumAPI {
 			var h   = await GetData($"{ForumPaths.ConversationsPath}add").ConfigureAwait(false);
 			var doc = new HtmlDocument();
 			doc.LoadHtml(await h.Content.ReadAsStringAsync().ConfigureAwait(false));
-			var xftoken = doc.DocumentNode.SelectSingleNode("//input[@name='_xfToken']").GetAttributeValue("value", "");
+			var xftoken = doc.DocumentNode.GetInputValueByName("_xfToken");
 
 			var kvlist = new List<KeyValuePair<string, string>> {
 				new KeyValuePair<string, string>("recipients",   string.Join(',', participants)),

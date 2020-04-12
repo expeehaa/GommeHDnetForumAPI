@@ -39,11 +39,11 @@ namespace GommeHDnetForumAPI.Models.Entities {
 			var qrnode = doc.GetElementbyId("QuickReply");
 			if (qrnode == null) return false;
 
-			var xftoken            = qrnode.SelectSingleNode(".//input[@name='_xfToken']").GetAttributeValue("value", "");
-			var xfrelativeresolver = qrnode.SelectSingleNode(".//input[@name='_xfRelativeResolver']").GetAttributeValue("value", "");
-			var attachment_hash    = qrnode.SelectSingleNode(".//input[@name='attachment_hash']").GetAttributeValue("value", "");
-			var last_date          = qrnode.SelectSingleNode(".//input[@name='last_date']").GetAttributeValue("value", "");
-			var last_known_date    = qrnode.SelectSingleNode(".//input[@name='last_known_date']").GetAttributeValue("value", "");
+			var xftoken            = qrnode.GetInputValueByName("_xfToken");
+			var xfrelativeresolver = qrnode.GetInputValueByName("_xfRelativeResolver");
+			var attachment_hash    = qrnode.GetInputValueByName("attachment_hash");
+			var last_date          = qrnode.GetInputValueByName("last_date");
+			var last_known_date    = qrnode.GetInputValueByName("last_known_date");
 
 			var kvlist = new List<KeyValuePair<string, string>> {
 				new KeyValuePair<string, string>("message_html",        message),
