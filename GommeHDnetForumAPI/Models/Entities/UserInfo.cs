@@ -25,7 +25,8 @@ namespace GommeHDnetForumAPI.Models.Entities {
 		}
 
 		public async Task DownloadDataAsync() {
-			var nInfo = await new UserInfoParser(Forum, Id).ParseAsync().ConfigureAwait(false);
+			var doc   = await Forum.GetHtmlDocument(UrlPath);
+			var nInfo = new UserInfoParser(Forum).Parse(doc.DocumentNode);
 			if (nInfo == null) return;
 
 			Username       = nInfo.Username;

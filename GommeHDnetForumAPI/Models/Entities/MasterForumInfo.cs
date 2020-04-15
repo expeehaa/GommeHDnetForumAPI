@@ -17,7 +17,9 @@ namespace GommeHDnetForumAPI.Models.Entities {
 		}
 
 		public async Task DownloadData() {
-			var mfi = await new MasterForumParser(Forum).ParseAsync().ConfigureAwait(false);
+			var doc = await Forum.GetHtmlDocument(ForumPaths.ForumPath);
+			var mfi = new MasterForumParser(Forum).Parse(doc.DocumentNode);
+
 			Categories = mfi.Categories;
 		}
 

@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.Models.Entities.Interfaces;
 using GommeHDnetForumAPI.Parser;
+using GommeHDnetForumAPI.Parser.LiNodeParser;
+using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Models.Entities {
 	public class SubForum : IndexedEntity, ISubForum {
@@ -42,13 +45,26 @@ namespace GommeHDnetForumAPI.Models.Entities {
 			=> await DownloadDataAsync(1).ConfigureAwait(false);
 
 		public async Task DownloadDataAsync(int startPage, int pageCount = 0) {
-			var sf = await new SubForumParser(this, startPage, pageCount).ParseAsync().ConfigureAwait(false);
+			startPage = Math.Max(1, startPage);
+			
+			var doc = await Forum.GetHtmlDocument($"{UrlPath}?page={startPage}");
+			var sf  = new SubForumParser(this).Parse(doc.DocumentNode);
 			Title       = sf.Title;
 			Description = sf.Description;
 			PostCount   = sf.PostCount;
 			SubForums   = sf.SubForums;
-			Threads     = sf.Threads;
 			Prefixes    = sf.Prefixes;
+
+			var lastPageNumber = doc.DocumentNode.SelectSingleNode("//div[@class='PageNav']")?.GetAttributeValue("data-last", 0) ?? 1;
+			var pageMax        = pageCount <= 0 ? lastPageNumber : Math.Min(startPage+pageCount-1, lastPageNumber);
+			var docs           = new List<HtmlDocument>{ doc };
+
+			for(var i = startPage; i <= pageMax; i++) {
+				docs.Add(await Forum.GetHtmlDocument($"{UrlPath}?page={i}"));
+			}
+
+			var parser = new ThreadsLiNodeParser(Forum, this);
+			Threads = sf.Threads.Concat(docs.SelectMany(doc => parser.Parse(doc.DocumentNode)));
 		}
 
 		public override string ToString()

@@ -1,20 +1,13 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
-using GommeHDnetForumAPI.Models;
 using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {
 	internal class ForumThreadParser : Parser<ForumThread> {
-		private readonly long Id;
+		public ForumThreadParser(Forum forum, long id) : base(forum) { }
 
-		public ForumThreadParser(Forum forum, long id) : base(forum, new BasicUrl(ForumPaths.ForumThreadsPath + id)) {
-			Id = id;
-		}
-
-		public override async Task<ForumThread> ParseAsync() {
-			var doc          = await GetDoc().ConfigureAwait(false);
-			var titleBarNode = doc.DocumentNode.SelectSingleNode("//div[@class='titleBar']");
+		public override ForumThread Parse(HtmlNode node) {
+			var titleBarNode = node.SelectSingleNode("//div[@class='titleBar']");
 			if (titleBarNode == null) throw new NodeNotFoundException();
 			var h1         = titleBarNode.SelectSingleNode("./h1");
 			var prefixnode = h1.SelectSingleNode("./span[@class='prefix']");

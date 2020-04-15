@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {
 	internal class MembersListLiNodeParser : LiNodeParser<UserInfo, object> {
-		public MembersListLiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes) : base(forum, liNodes, null) { }
+		public MembersListLiNodeParser(Forum forum) : base(forum, null, ".//div[@class='section']/ol[@class='memberList']/li") { }
 
 		protected override UserInfo ParseElement(HtmlNode node) {
 			var aNode        = node.SelectSingleNode("./a");

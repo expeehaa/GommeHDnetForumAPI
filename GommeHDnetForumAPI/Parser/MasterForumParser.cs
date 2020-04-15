@@ -1,23 +1,18 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using GommeHDnetForumAPI.Models;
 using GommeHDnetForumAPI.Models.Entities;
-using GommeHDnetForumAPI.Models.Entities.Interfaces;
 using GommeHDnetForumAPI.Parser.LiNodeParser;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {
 	internal class MasterForumParser : Parser<MasterForumInfo> {
-		public MasterForumParser(Forum forum) : base(forum, new BasicUrl(ForumPaths.ForumPath)) { }
+		public MasterForumParser(Forum forum) : base(forum) { }
 
-		public override async Task<MasterForumInfo> ParseAsync() {
-			var doc        = await GetDoc().ConfigureAwait(false);
+		public override MasterForumInfo Parse(HtmlNode node) {
 			var categories = new List<MasterForumCategoryInfo>();
 
-			foreach (var li in doc.DocumentNode.SelectNodes("//ol[@id='forums']/li")) {
+			foreach (var li in node.SelectNodes("//ol[@id='forums']/li")) {
 				var nullableid = GetIdFromNodeClass(li);
 				if (nullableid == null) continue;
 				var id        = nullableid.Value;
@@ -25,10 +20,9 @@ namespace GommeHDnetForumAPI.Parser {
 				if (titlenode == null) continue;
 				var title       = WebUtility.HtmlDecode(titlenode.InnerText);
 				var href        = titlenode.GetAttributeValue("href", "");
-				var description = WebUtility.HtmlDecode(doc.GetElementbyId($"nodeDescription-{id}")?.InnerText ?? string.Empty);
+				var description = WebUtility.HtmlDecode(node.OwnerDocument.GetElementbyId($"nodeDescription-{id}")?.InnerText ?? string.Empty);
 				var mfci        = new MasterForumCategoryInfo(Forum, id, title, description, href);
-				var sflinodes   = li.SelectNodes(".//ol[@class='nodeList']/li");
-				mfci.SubForums = sflinodes != null && sflinodes.Any() ? new SubForumLiNodeParser(Forum, sflinodes, mfci).ParseAsync().GetAwaiter().GetResult() : new List<ISubForum>();
+				mfci.SubForums = new SubForumLiNodeParser(Forum, mfci).Parse(li);
 				categories.Add(mfci);
 			}
 

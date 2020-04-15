@@ -49,7 +49,8 @@ namespace GommeHDnetForumAPI {
 			if (!HasCredentials) return false;
 			var success = await Login().ConfigureAwait(false);
 			if (!success) return false;
-			MasterForum = await new MasterForumParser(this).ParseAsync().ConfigureAwait(false);
+			var doc = await GetHtmlDocument(ForumPaths.ForumPath);
+			MasterForum = new MasterForumParser(this).Parse(doc.DocumentNode);
 			return true;
 		}
 
@@ -100,7 +101,8 @@ namespace GommeHDnetForumAPI {
 			var html = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 			doc.LoadHtml(html);
 			var urlpath = doc.DocumentNode.SelectSingleNode("//div[@class='userbar']//a[@class='btn btn-link profile']").GetAttributeValue("href", "");
-			SelfUser = await new UserInfoParser(this, urlpath, false).ParseAsync().ConfigureAwait(false);
+			var selfuserDoc = await GetHtmlDocument(urlpath);
+			SelfUser = new UserInfoParser(this).Parse(selfuserDoc.DocumentNode);
 			return true;
 		}
 
@@ -132,8 +134,28 @@ namespace GommeHDnetForumAPI {
 			return checkSuccess ? response.EnsureSuccessStatusCode() : response;
 		}
 
-		public async Task<ThreadCollection<ConversationInfo>> GetConversations(int startPage = 0, int pageCount = 0)
-			=> await new ConversationsParser(this, startPage, pageCount).ParseAsync().ConfigureAwait(false);
+		public async Task<HtmlDocument> GetHtmlDocument(string path, bool addBaseUrl = true) {
+			var response = await GetData(path, true, addBaseUrl);
+			var doc = new HtmlDocument();
+			doc.LoadHtml(await response.Content.ReadAsStringAsync());
+			return doc;
+		}
+
+		public async Task<List<ConversationInfo>> GetConversations(int startPage = 0, int pageCount = 0) {
+			startPage          = Math.Max(1, startPage);
+			
+			var doc            = await GetHtmlDocument($"{ForumPaths.ConversationsPath}?page={startPage}");
+			var lastPageNumber = doc.DocumentNode.SelectSingleNode("//div[@class='PageNav']")?.GetAttributeValue("data-last", 0) ?? 1;
+			var pageMax        = pageCount <= 0 ? lastPageNumber : Math.Min(startPage+pageCount-1, lastPageNumber);
+			var docs           = new List<HtmlDocument>{ doc };
+
+			for(var i = startPage; i <= pageMax; i++) {
+				docs.Add(await GetHtmlDocument($"{ForumPaths.ConversationsPath}?page={i}"));
+			}
+
+			var parser = new ConversationLiNodeParser(this);
+			return docs.SelectMany(d => parser.Parse(d.DocumentNode)).ToList();
+		}
 
 		public async Task<HttpResponseMessage> GetMainForum()
 			=> await GetData("forum").ConfigureAwait(false);
@@ -178,11 +200,15 @@ namespace GommeHDnetForumAPI {
 				new KeyValuePair<string, string>("_xfToken",     xftoken)
 			};
 			var hrm = await PostData($"{ForumPaths.ConversationsPath}insert", kvlist).ConfigureAwait(false);
-			return await new ConversationInfoParser(this, await hrm.Content.ReadAsStringAsync().ConfigureAwait(false)).ParseAsync().ConfigureAwait(false);
+			doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
+
+			return new ConversationInfoParser(this).Parse(doc.DocumentNode);
 		}
 
-		public async Task<UserInfo> GetUserInfo(long userId)
-			=> await new UserInfoParser(this, userId).ParseAsync().ConfigureAwait(false);
+		public async Task<UserInfo> GetUserInfo(long userId) {
+			var doc = await GetHtmlDocument($"{ForumPaths.MembersPath}{userId}");
+			return new UserInfoParser(this).Parse(doc.DocumentNode);
+		}
 
 		//todo: throw exceptions
 		public async Task<UserInfo> GetUserInfo(string username) {
@@ -197,7 +223,8 @@ namespace GommeHDnetForumAPI {
 			}, false).ConfigureAwait(false);
 			if (!hrm.IsSuccessStatusCode) return null;
 			try {
-				return await new UserInfoParser(this, await hrm.Content.ReadAsStringAsync().ConfigureAwait(false)).ParseAsync().ConfigureAwait(false);
+				doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
+				return new UserInfoParser(this).Parse(doc.DocumentNode);
 			} catch (NodeNotFoundException) {
 				throw new UserNotFoundException();
 			}
@@ -207,8 +234,7 @@ namespace GommeHDnetForumAPI {
 			var hrm = await GetData(ForumPaths.GetMembersListTypePath(type)).ConfigureAwait(false);
 			var doc = new HtmlDocument();
 			doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
-			var liNodes = doc.DocumentNode.SelectNodes(".//div[@class='section']/ol[@class='memberList']/li");
-			var users   = await new MembersListLiNodeParser(this, liNodes).ParseAsync().ConfigureAwait(false);
+			var users = new MembersListLiNodeParser(this).Parse(doc.DocumentNode);
 			return users.ToUserCollection();
 		}
 

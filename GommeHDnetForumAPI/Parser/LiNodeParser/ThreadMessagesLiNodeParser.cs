@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {
 	internal class ThreadMessagesLiNodeParser : LiNodeParser<ForumPost, ForumThread> {
-		public ThreadMessagesLiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes, ForumThread parent) : base(forum, liNodes, parent) { }
+		public ThreadMessagesLiNodeParser(Forum forum, ForumThread parent) : base(forum, parent, "//ol[@id='messageList']/li") { }
 
 		protected override ForumPost ParseElement(HtmlNode node) {
 			if (!Regex.IsMatch(node.Id, "post-([0-9]+)")) return default;

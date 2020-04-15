@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Text.RegularExpressions;
 using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {
 	internal class ThreadsLiNodeParser : LiNodeParser<ForumThread, SubForum> {
-		public ThreadsLiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes, SubForum parent) : base(forum, liNodes, parent) { }
+		public ThreadsLiNodeParser(Forum forum, SubForum parent) : base(forum, parent, "//ol[@class='discussionListItems']/li") { }
 
 		protected override ForumThread ParseElement(HtmlNode node) {
 			var author = node.GetAttributeValue("data-author", "");

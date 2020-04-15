@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using GommeHDnetForumAPI.Models.Collections;
 using GommeHDnetForumAPI.Models.Entities;
@@ -7,7 +6,7 @@ using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {
 	internal class ConversationLiNodeParser : LiNodeParser<ConversationInfo, object> {
-		public ConversationLiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes) : base(forum, liNodes, null) { }
+		public ConversationLiNodeParser(Forum forum) : base(forum, null, "//ol[@class='discussionListItems']/li") { }
 
 		protected override ConversationInfo ParseElement(HtmlNode node) {
 			if (!Regex.IsMatch(node.Id, "conversation-([0-9]+)")) return null;

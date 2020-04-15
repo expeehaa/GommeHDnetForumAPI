@@ -8,7 +8,7 @@ using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {
 	internal class SubForumLiNodeParser : LiNodeParser<ISubForum, IForum> {
-		public SubForumLiNodeParser(Forum forum, IEnumerable<HtmlNode> liNodes, IForum parent) : base(forum, liNodes, parent) { }
+		public SubForumLiNodeParser(Forum forum, IForum parent) : base(forum, parent, ".//ol[@class='nodeList']/li") { }
 
 		protected override ISubForum ParseElement(HtmlNode node) {
 			//SubLink
