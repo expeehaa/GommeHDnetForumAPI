@@ -25,7 +25,7 @@ namespace GommeHDnetForumAPITest {
 			TestConversations(forum);
 			TestForumThreads(forum);
 			TestMembersLists(forum);
-			//TestConversationReply(forum);
+			TestConversationReply(forum);
 		}
 
 		public static void TestUserInfoParsing(Forum forum) {
@@ -35,11 +35,6 @@ namespace GommeHDnetForumAPITest {
 			Console.ReadLine();
 		}
 
-		/// <summary>
-		/// Downloads and prints all accessible and verified forum users before the given id.
-		/// </summary>
-		/// <param name="forum">The Forum instance to download the users with.</param>
-		/// <param name="maxId">Exclusive maximum user ID</param>
 		public static void AllUserAccountsBeforeId(Forum forum, int maxId) {
 			var userinfos = new List<UserInfo>();
 
@@ -66,7 +61,7 @@ namespace GommeHDnetForumAPITest {
 			Console.WriteLine($"\n\n{string.Join("\n", userinfos.Select(u => $"Id {u.Id,3} | Name @{u.Username,-16}").ToArray())}");
 		}
 
-		private static void TestConversations(Forum forum) {
+		public static void TestConversations(Forum forum) {
 			var cons = forum.GetConversations().GetAwaiter().GetResult();
 			var con1 = cons.First();
 
@@ -89,7 +84,7 @@ namespace GommeHDnetForumAPITest {
 			}
 		}
 
-		private static void TestForumThreads(Forum forum) {
+		public static void TestForumThreads(Forum forum) {
 			const string forumname = "off-topic";
 			var someForum = forum.MasterForum.SubForums.FirstOrDefault(sf => string.Equals(sf.Title, forumname, StringComparison.OrdinalIgnoreCase));
 
@@ -129,7 +124,7 @@ namespace GommeHDnetForumAPITest {
 			Console.ReadLine();
 		}
 
-		private static void TestConversationReply(Forum forum) {
+		public static void TestConversationReply(Forum forum) {
 			var conversations = forum.GetConversations(1, 1).GetAwaiter().GetResult();
 			var con           = conversations.First(c => c.Title.Equals("Betaverify"));
 			var success       = con.Reply("Testnachricht").GetAwaiter().GetResult();
