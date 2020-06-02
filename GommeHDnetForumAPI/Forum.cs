@@ -245,5 +245,22 @@ namespace GommeHDnetForumAPI {
 			var numberString = string.Join("", doc.DocumentNode.SelectNodes("//dd/span").Select(node => node.InnerText));
 			return int.Parse(numberString);
 		}
+
+		public async Task<string> GetNotificationText() {
+			var hrm = await GetData(ForumPaths.NotificationsPath).ConfigureAwait(false);
+			var doc = new HtmlDocument();
+			doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
+
+			var notificationsContainer = doc.DocumentNode.SelectSingleNode("//div[contains(concat(' ', normalize-space(@class), ' '), ' notificationsContainer ')]");
+			if(notificationsContainer != null) {
+				foreach(var button in notificationsContainer.SelectNodes("//button") ?? new HtmlNodeCollection(notificationsContainer)) {
+					notificationsContainer.RemoveChild(button);
+				}
+
+				return notificationsContainer.InnerText.Trim();
+			} else {
+				return null;
+			}
+		}
 	}
 }

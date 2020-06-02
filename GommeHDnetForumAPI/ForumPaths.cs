@@ -11,6 +11,7 @@ namespace GommeHDnetForumAPI {
 		public const string ForumsPath           = "forum/forums/";
 		public const string ForumThreadsPath     = "forum/threads/";
 		public const string StatsUsersOnlinePath = "stats/users-online/";
+		public const string NotificationsPath    = "xen-forum/notifications";
 
 		public const string ForumUrl         = BaseUrl + ForumPath;
 		public const string ConversationsUrl = BaseUrl + ConversationsPath;
