@@ -3,7 +3,7 @@ using System.Linq;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {
-	internal abstract class LiNodeParser<T, TO> : Parser<IEnumerable<T>> {
+	public abstract class LiNodeParser<T, TO> : Parser<IEnumerable<T>> {
 		protected string LiNodeSelector;
 		protected readonly TO Parent;
 

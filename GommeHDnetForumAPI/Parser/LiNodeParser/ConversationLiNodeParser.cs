@@ -5,7 +5,7 @@ using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser.LiNodeParser {
-	internal class ConversationLiNodeParser : LiNodeParser<ConversationInfo, object> {
+	public class ConversationLiNodeParser : LiNodeParser<ConversationInfo, object> {
 		public ConversationLiNodeParser(Forum forum) : base(forum, null, "//ol[@class='discussionListItems']/li") { }
 
 		protected override ConversationInfo ParseElement(HtmlNode node) {
