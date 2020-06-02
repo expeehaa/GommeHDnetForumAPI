@@ -2,7 +2,7 @@
 
 namespace GommeHDnetForumAPI.Models.Entities {
 	public class ConversationMessage : IndexedEntity, IPost<ConversationInfo> {
-		public UserInfo         Author  { get; }
+		public IUserInfo        Author  { get; }
 		public string           Content { get; }
 		public ConversationInfo Parent  { get; }
 		public string           UrlPath => $"{Parent.UrlPath}message?message_id={Id}";
@@ -14,6 +14,6 @@ namespace GommeHDnetForumAPI.Models.Entities {
 		}
 
 		public override string ToString()
-			=> $"Id: {Id} | MsgAuthor: {Author.Username} | Content: \"{Content}\"";
+			=> $"Id: {Id} | MsgAuthor: {Author} | Content: \"{Content}\"";
 	}
 }

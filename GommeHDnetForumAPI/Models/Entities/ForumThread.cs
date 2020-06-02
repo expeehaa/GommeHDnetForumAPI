@@ -9,13 +9,13 @@ using HtmlAgilityPack;
 namespace GommeHDnetForumAPI.Models.Entities {
 	public class ForumThread : IndexedEntity, IThread<ForumPost> {
 		public string                 Title    { get; }
-		public UserInfo               Author   { get; }
+		public IUserInfo              Author   { get; }
 		public IEnumerable<ForumPost> Messages { get; private set; }
 		public ThreadPrefix           Prefix   { get; }
 		public SubForum               Parent   { get; }
 		public string                 UrlPath  => $"{ForumPaths.ForumThreadsPath}{Id}/";
 
-		internal ForumThread(Forum forum, long id, string title, UserInfo author, SubForum parent, ThreadPrefix prefix = null) : base(forum, id) {
+		internal ForumThread(Forum forum, long id, string title, IUserInfo author, SubForum parent, ThreadPrefix prefix = null) : base(forum, id) {
 			Title  = title;
 			Author = author;
 			Parent = parent;
@@ -42,6 +42,6 @@ namespace GommeHDnetForumAPI.Models.Entities {
 		}
 
 		public override string ToString()
-			=> $"Id: {Id} | {(Prefix == null ? $"Title: {Title}" : $"(P)Title: ({Prefix}){Title}")} | Author: {Author.Username} | Parent: {Parent.Title}";
+			=> $"Id: {Id} | {(Prefix == null ? $"Title: {Title}" : $"(P)Title: ({Prefix}){Title}")} | Author: {Author} | Parent: {Parent.Title}";
 	}
 }

@@ -12,18 +12,18 @@ using HtmlAgilityPack;
 namespace GommeHDnetForumAPI.Models.Entities {
 	public class ConversationInfo : IndexedEntity, IThread<ConversationMessage> {
 		public string                           Title       { get; }
-		public UserInfo                         Author      { get; }
+		public IUserInfo                        Author      { get; }
 		public UserCollection                   Members     { get; }
 		public uint                             AnswerCount { get; }
 		public IEnumerable<ConversationMessage> Messages    { get; private set; }
 		public string                           UrlPath     => $"{ForumPaths.ConversationsPath}{Id}/";
 
-		internal ConversationInfo(Forum forum, long id, string title, UserInfo author, UserCollection members, uint answerCount) : base(forum, id) {
+		internal ConversationInfo(Forum forum, long id, string title, IUserInfo author, UserCollection members, uint answerCount) : base(forum, id) {
 			Title       = title;
 			Author      = author;
 			Members     = members;
 			AnswerCount = answerCount;
-			Messages    = null;
+			Messages    = new List<ConversationMessage>();
 		}
 
 		public async Task DownloadMessagesAsync()

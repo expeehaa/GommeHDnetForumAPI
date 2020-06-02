@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using GommeHDnetForumAPI.Models.Entities.Interfaces;
 using GommeHDnetForumAPI.Parser;
 
 namespace GommeHDnetForumAPI.Models.Entities {
-	public class UserInfo : IndexedEntity {
+	public class UserInfo : IndexedEntity, IUserInfo {
 		public string    Username       { get; internal set; }
 		public string    AvatarUrl      { get; internal set; }
 		public DateTime? TimeRegistered { get; internal set; }
