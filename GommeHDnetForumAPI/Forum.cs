@@ -254,7 +254,7 @@ namespace GommeHDnetForumAPI {
 			var notificationsContainer = doc.DocumentNode.SelectSingleNode("//div[contains(concat(' ', normalize-space(@class), ' '), ' notificationsContainer ')]");
 			if(notificationsContainer != null) {
 				foreach(var button in notificationsContainer.SelectNodes("//button") ?? new HtmlNodeCollection(notificationsContainer)) {
-					notificationsContainer.RemoveChild(button);
+					button.Remove();
 				}
 
 				return notificationsContainer.InnerText.Trim();
