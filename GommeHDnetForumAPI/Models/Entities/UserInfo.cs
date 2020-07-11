@@ -18,6 +18,7 @@ namespace GommeHDnetForumAPI.Models.Entities {
 		public string    UserTitle      { get; internal set; }
 
 		public string UrlPath => $"{ForumPaths.ForumPath}members/{Id}";
+		public string Url     => $"{ForumPaths.BaseUrl}{UrlPath}";
 
 		public UserInfo(Forum forum, long id) : base(forum, id) { }
 
