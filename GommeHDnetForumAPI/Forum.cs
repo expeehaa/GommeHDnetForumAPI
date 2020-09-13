@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using CloudFlareUtilities;
+using CloudflareSolverRe;
 using GommeHDnetForumAPI.Exceptions;
 using GommeHDnetForumAPI.Models;
 using GommeHDnetForumAPI.Models.Collections;
@@ -64,7 +64,9 @@ namespace GommeHDnetForumAPI {
 				SslProtocols                              = SslProtocols.Tls12
 			};
 			_clearanceHandler = new ClearanceHandler(_httpClientHandler) {
-				MaxRetries = 5
+				MaxTries        = 5,
+				MaxCaptchaTries = 3,
+				ClearanceDelay  = 3000,
 			};
 			_httpClient = new HttpClient(_clearanceHandler) {BaseAddress = new Uri(ForumPaths.BaseUrl)};
 			_httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
