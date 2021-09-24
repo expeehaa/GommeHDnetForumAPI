@@ -72,7 +72,7 @@ namespace GommeHDnetForumAPI {
 			_httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
 			_httpClient.DefaultRequestHeaders.Add("Referer",       ForumPaths.BaseUrl);
 			_httpClient.Timeout = TimeSpan.FromSeconds(10);
-			UserAgent           = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0";
+			UserAgent           = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0";
 		}
 
 		private void ResetCookies() {
