@@ -8,22 +8,29 @@ using System.Security.Authentication;
 using System.Threading.Tasks;
 using CloudflareSolverRe;
 using GommeHDnetForumAPI.Exceptions;
+using GommeHDnetForumAPI.GraphQL;
 using GommeHDnetForumAPI.Models;
 using GommeHDnetForumAPI.Models.Collections;
 using GommeHDnetForumAPI.Models.Entities;
 using GommeHDnetForumAPI.Parser;
-using GommeHDnetForumAPI.Parser.LiNodeParser;
+using GommeHDnetForumAPI.Parser.NodeListParser;
+using GraphQL;
+using GraphQL.Client.Abstractions;
+using GraphQL.Client.Http;
+using GraphQL.Client.Serializer.Newtonsoft;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI {
 	public class Forum {
-		private string _username;
+		private string _email;
 		private string _password;
 
-		public bool            HasCredentials => !string.IsNullOrWhiteSpace(_username) && !string.IsNullOrWhiteSpace(_password);
-		public bool            LoggedIn       => SelfUser != null;
-		public UserInfo        SelfUser       { get; private set; }
-		public MasterForumInfo MasterForum    { get; private set; }
+		private string _token;
+
+		public bool HasCredentials => !string.IsNullOrWhiteSpace(_email) && !string.IsNullOrWhiteSpace(_password);
+		public bool LoggedIn => SelfUser != null;
+		public UserInfo SelfUser { get; private set; }
+		public MasterForumInfo MasterForum { get; private set; }
 
 		public string UserAgent {
 			get => _httpClient.DefaultRequestHeaders.UserAgent.ToString();
@@ -35,20 +42,23 @@ namespace GommeHDnetForumAPI {
 		private ClearanceHandler  _clearanceHandler;
 		private HttpClient        _httpClient;
 
+		private GraphQLHttpClient _graphQLHttpClient;
+
 		public Forum() : this(null, null) { }
 
-		public Forum(string username, string password) {
+		public Forum(string email, string password) {
 			InitHttpClient();
-			ChangeCredentials(username, password).GetAwaiter().GetResult();
+			ChangeCredentials(email, password).GetAwaiter().GetResult();
 		}
 
-		public async Task<bool> ChangeCredentials(string username, string password) {
-			_username = username;
+		public async Task<bool> ChangeCredentials(string email, string password) {
+			_email = email;
 			_password = password;
-			ResetCookies();
-			if (!HasCredentials) return false;
-			var success = await Login().ConfigureAwait(false);
-			if (!success) return false;
+			if(!HasCredentials)
+				return false;
+			var success = await Login();
+			if(!success)
+				return false;
 			var doc = await GetHtmlDocument(ForumPaths.ForumPath);
 			MasterForum = new MasterForumParser(this).Parse(doc.DocumentNode);
 			return true;
@@ -57,54 +67,100 @@ namespace GommeHDnetForumAPI {
 		private void InitHttpClient() {
 			ResetCookies();
 			_httpClientHandler = new HttpClientHandler {
-				CookieContainer                           = _cookieContainer,
-				AllowAutoRedirect                         = true,
-				UseCookies                                = true,
+				CookieContainer = _cookieContainer,
+				AllowAutoRedirect = true,
+				UseCookies = true,
 				ServerCertificateCustomValidationCallback = (message, certificate2, arg3, arg4) => true,
-				SslProtocols                              = SslProtocols.Tls12
+				SslProtocols = SslProtocols.Tls12
 			};
 			_clearanceHandler = new ClearanceHandler(_httpClientHandler) {
-				MaxTries        = 5,
+				MaxTries = 5,
 				MaxCaptchaTries = 3,
-				ClearanceDelay  = 3000,
+				ClearanceDelay = 3000,
 			};
-			_httpClient = new HttpClient(_clearanceHandler) {BaseAddress = new Uri(ForumPaths.BaseUrl)};
+			_httpClient = new HttpClient(_clearanceHandler) { BaseAddress = new Uri(ForumPaths.BaseUrl) };
 			_httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-			_httpClient.DefaultRequestHeaders.Add("Referer",       ForumPaths.BaseUrl);
+			_httpClient.DefaultRequestHeaders.Add("Referer", ForumPaths.BaseUrl);
 			_httpClient.Timeout = TimeSpan.FromSeconds(10);
-			UserAgent           = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0";
+			UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0";
+
+			_graphQLHttpClient = new GraphQLHttpClient(ForumPaths.GraphQLApiUrl, new NewtonsoftJsonSerializer());
 		}
 
 		private void ResetCookies() {
 			_cookieContainer = new CookieContainer();
+
+			if(_httpClientHandler is not null) {
+				_httpClientHandler.CookieContainer = _cookieContainer;
+			}
 		}
 
 		private async Task<bool> Login() {
-			if (!HasCredentials) throw new CredentialsRequiredException();
-			var hrm = await GetData("login").ConfigureAwait(false);
-			var doc = new HtmlDocument();
-			doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
-			var csrf = doc.DocumentNode.GetInputValueByName("_csrf");
+			if(!HasCredentials)
+				throw new CredentialsRequiredException();
 
-			if (string.IsNullOrWhiteSpace(csrf)) return false;
+			ResetCookies();
 
-			var list = new List<KeyValuePair<string, string>> {
-				new KeyValuePair<string, string>("LoginForm[username]", _username),
-				new KeyValuePair<string, string>("LoginForm[password]", _password),
-				new KeyValuePair<string, string>("_csrf",               csrf)
-			};
-			var fuec = new FormUrlEncodedContent(list);
-			fuec.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
-			var response = await _httpClient.PostAsync(ForumPaths.BaseUrl + "login", fuec).ConfigureAwait(false);
-			if (!response.IsSuccessStatusCode) {
-				return false;
-			}
+			var forumResp = await GetData(ForumPaths.ForumLoginPath);
 
-			var html = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-			doc.LoadHtml(html);
-			var urlpath = doc.DocumentNode.SelectSingleNode("//div[@class='userbar']//a[@class='btn btn-link profile']").GetAttributeValue("href", "");
-			var selfuserDoc = await GetHtmlDocument(urlpath);
-			SelfUser = new UserInfoParser(this).Parse(selfuserDoc.DocumentNode);
+			var userMutationResponse = await _graphQLHttpClient.SendMutationAsync(new GraphQLRequest {
+				OperationName = "login",
+				Query = @"
+					mutation login($email: String!, $password: String!, $captcha: String!) {
+						user {
+							login(user: $email, password: $password, captcha: $captcha) {
+								success
+								requireTwoFa
+								needToMigrate
+								token
+								error
+								__typename
+							}
+							__typename
+						}
+					}
+				",
+				Variables = new {
+					email = _email,
+					password = _password,
+					captcha = "Please don't block this ^_^",
+				},
+			}, () => new { user = new UserMutation() });
+
+			_token = userMutationResponse.Data.user.Login.Token;
+
+			var forumAuthResponse = await _graphQLHttpClient.SendMutationAsync(new AuthorizedRequest {
+				OperationName = "forumAuth",
+				Query = @"
+					mutation forumAuth($redirect: String!, $darkMode: Boolean) {
+						user {
+							forumAuth(redirect: $redirect, darkMode: $darkMode) {
+								success
+								error
+								__typename
+							}
+						__typename
+						}
+					}
+				",
+				Variables = new {
+					darkMode = true,
+					redirect = ForumPaths.BaseUrl + ForumPaths.ForumConnectedAccountPath,
+				},
+				Authorization = _token,
+			}, () => new { user = new UserMutation() });
+
+			_cookieContainer.Add(new Uri("https://www.gommehd.net"), new CookieCollection() {
+				new Cookie("user-token", _token),
+				new Cookie("i18n_redirected", "de_DE"),
+			});
+
+			await GetData($"{ForumPaths.ForumConnectedAccountPath}?code={forumAuthResponse.Data.user.ForumAuth.ForumToken}");
+
+			var forumDoc = await GetHtmlDocument(ForumPaths.ForumPath);
+			var selfUserId = forumDoc.DocumentNode.SelectSingleNode("//div[contains(concat(' ', normalize-space(@class), ' '), ' p-header-content ')]//div[contains(concat(' ', normalize-space(@class), ' '), ' p-account ')]//span[contains(concat(' ', normalize-space(@class), ' '), ' avatar ')]").GetAttributeValue("data-user-id", 0);
+			SelfUser = await GetUserInfo(selfUserId);
+
 			return true;
 		}
 
@@ -136,31 +192,89 @@ namespace GommeHDnetForumAPI {
 			return checkSuccess ? response.EnsureSuccessStatusCode() : response;
 		}
 
-		public async Task<HtmlDocument> GetHtmlDocument(string path, bool addBaseUrl = true) {
-			var response = await GetData(path, true, addBaseUrl);
+		public async Task<HtmlDocument> GetHtmlDocument(string path) {
+			var response = await GetData(path);
 			var doc = new HtmlDocument();
 			doc.LoadHtml(await response.Content.ReadAsStringAsync());
 			return doc;
 		}
 
 		public async Task<List<ConversationInfo>> GetConversations(int startPage = 0, int pageCount = 0) {
-			startPage          = Math.Max(1, startPage);
-			
-			var doc            = await GetHtmlDocument($"{ForumPaths.ConversationsPath}?page={startPage}");
-			var lastPageNumber = doc.DocumentNode.SelectSingleNode("//div[@class='PageNav']")?.GetAttributeValue("data-last", 0) ?? 1;
-			var pageMax        = pageCount <= 0 ? lastPageNumber : Math.Min(startPage+pageCount-1, lastPageNumber);
-			var docs           = new List<HtmlDocument>{ doc };
+			startPage = Math.Max(1, startPage);
 
-			for(var i = startPage; i <= pageMax; i++) {
-				docs.Add(await GetHtmlDocument($"{ForumPaths.ConversationsPath}?page={i}"));
+			var doc                  = await GetHtmlDocument($"{ForumPaths.ConversationsPath}page-{startPage}");
+			var lastPageNumberString = doc.DocumentNode.SelectSingleNode("(//div[contains(concat(' ', normalize-space(@class), ' '), ' pageNav ')]/ul/li)[last()]")?.InnerText;
+			var lastPageNumber       = !string.IsNullOrWhiteSpace(lastPageNumberString) ? int.Parse(lastPageNumberString) : 1;
+			var pageMax              = pageCount <= 0 ? lastPageNumber : Math.Min(startPage+pageCount-1, lastPageNumber);
+			var docs                 = new List<HtmlDocument>{ doc };
+
+			for(var i = startPage + 1; i <= pageMax; i++) {
+				docs.Add(await GetHtmlDocument($"{ForumPaths.ConversationsPath}page-{i}"));
 			}
 
-			var parser = new ConversationLiNodeParser(this);
+			var parser = new ConversationsNodeListParser(this);
 			return docs.SelectMany(d => parser.Parse(d.DocumentNode)).ToList();
 		}
 
-		public async Task<HttpResponseMessage> GetMainForum()
-			=> await GetData("forum").ConfigureAwait(false);
+		public async Task<User> GetSelfUser() {
+			var authResponse = await _graphQLHttpClient.SendQueryAsync(new AuthorizedRequest {
+				OperationName = "auth",
+				Query = @"
+					query auth($token: String) {
+						auth(token: $token) {
+							success
+							forceTwoFa
+							user {
+								id
+								email
+								hasTwoFa
+								locale
+								emailVerified
+								minecraft {
+									uuid
+									name
+									__typename
+								}
+								discord {
+									id
+									name
+									hash
+									avatar
+									__typename
+								}
+								teamspeak
+								twitch {
+									channel
+									avatar
+									__typename
+								}
+								youtube {
+									channel
+									name
+									avatar
+									__typename
+								}
+								twitter {
+									id
+									name
+									handle
+									avatar
+									__typename
+								}
+								__typename
+							}
+							__typename
+						}
+					}
+				",
+				Variables = new {
+					token = _token,
+				},
+				Authorization = _token,
+			}, () => new { auth = new AuthResponse() });
+
+			return authResponse.Data.auth.User;
+		}
 
 		/// <summary>
 		/// Create a new conversation.
@@ -188,10 +302,10 @@ namespace GommeHDnetForumAPI {
 		/// <param name="openInvite">Participants may invite other users to the conversation if true.</param>
 		/// <returns>ConversationInfo describing the created conversation.</returns>
 		public async Task<ConversationInfo> CreateConversation(string[] participants, string title, string message, bool openInvite = false) {
-			if (!LoggedIn) throw new LoginRequiredException("Log in to create a new conversation!");
-			var h   = await GetData($"{ForumPaths.ConversationsPath}add").ConfigureAwait(false);
-			var doc = new HtmlDocument();
-			doc.LoadHtml(await h.Content.ReadAsStringAsync().ConfigureAwait(false));
+			if(!LoggedIn)
+				throw new LoginRequiredException("Log in to create a new conversation!");
+
+			var doc     = await GetHtmlDocument($"{ForumPaths.ConversationsPath}add");
 			var xftoken = doc.DocumentNode.GetInputValueByName("_xfToken");
 
 			var kvlist = new List<KeyValuePair<string, string>> {
@@ -201,34 +315,42 @@ namespace GommeHDnetForumAPI {
 				new KeyValuePair<string, string>("open_invite",  openInvite ? "1" : "0"),
 				new KeyValuePair<string, string>("_xfToken",     xftoken)
 			};
-			var hrm = await PostData($"{ForumPaths.ConversationsPath}insert", kvlist).ConfigureAwait(false);
+			var hrm = await PostData($"{ForumPaths.ConversationsPath}add", kvlist).ConfigureAwait(false);
 			doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
 
 			return new ConversationInfoParser(this).Parse(doc.DocumentNode);
 		}
 
 		public async Task<UserInfo> GetUserInfo(long userId) {
-			var doc = await GetHtmlDocument($"{ForumPaths.MembersPath}{userId}");
-			return new UserInfoParser(this).Parse(doc.DocumentNode);
+			var hrm = await GetData($"{ForumPaths.MembersPath}{userId}", checkSuccess: false);
+
+			if(hrm.IsSuccessStatusCode) {
+				var doc = new HtmlDocument();
+				doc.LoadHtml(await hrm.Content.ReadAsStringAsync());
+				return new UserInfoParser(this).Parse(doc.DocumentNode);
+			} else {
+				return null;
+			}
 		}
 
-		//todo: throw exceptions
 		public async Task<UserInfo> GetUserInfo(string username) {
-			var h   = await GetData(ForumPaths.MembersPath).ConfigureAwait(false);
-			var doc = new HtmlDocument();
-			doc.LoadHtml(await h.Content.ReadAsStringAsync().ConfigureAwait(false));
-			var xftoken = doc.DocumentNode.SelectSingleNode("//form[@action='members/']/input[@name='_xfToken']").GetAttributeValue("value", "");
+			var doc     = await GetHtmlDocument(ForumPaths.MembersPath);
+			var xftoken = doc.DocumentNode.SelectSingleNode("//form[@action='/forum/members/']/input[@name='_xfToken']").GetAttributeValue("value", "");
 
 			var hrm = await PostData(ForumPaths.MembersPath, new List<KeyValuePair<string, string>> {
 				new KeyValuePair<string, string>("username", username),
 				new KeyValuePair<string, string>("_xfToken", xftoken)
 			}, false).ConfigureAwait(false);
-			if (!hrm.IsSuccessStatusCode) return null;
-			try {
-				doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
-				return new UserInfoParser(this).Parse(doc.DocumentNode);
-			} catch (NodeNotFoundException) {
-				throw new UserNotFoundException();
+
+			if(hrm.IsSuccessStatusCode) {
+				try {
+					doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
+					return new UserInfoParser(this).Parse(doc.DocumentNode);
+				} catch(NodeNotFoundException e) {
+					throw new UserNotFoundException(null, e);
+				}
+			} else {
+				return null;
 			}
 		}
 
@@ -236,33 +358,15 @@ namespace GommeHDnetForumAPI {
 			var hrm = await GetData(ForumPaths.GetMembersListTypePath(type)).ConfigureAwait(false);
 			var doc = new HtmlDocument();
 			doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
-			var users = new MembersListLiNodeParser(this).Parse(doc.DocumentNode);
+			var users = new MembersListNodeListParser(this).Parse(doc.DocumentNode);
 			return users.ToUserCollection();
 		}
 
 		public async Task<int> GetOnlineUserCount() {
-			var hrm = await GetData(ForumPaths.StatsUsersOnlinePath).ConfigureAwait(false);
-			var doc = new HtmlDocument();
-			doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
-			var numberString = string.Join("", doc.DocumentNode.SelectNodes("//dd/span").Select(node => node.InnerText));
-			return int.Parse(numberString);
-		}
-
-		public async Task<string> GetNotificationText() {
-			var hrm = await GetData(ForumPaths.NotificationsPath).ConfigureAwait(false);
-			var doc = new HtmlDocument();
-			doc.LoadHtml(await hrm.Content.ReadAsStringAsync().ConfigureAwait(false));
-
-			var notificationsContainer = doc.DocumentNode.SelectSingleNode("//div[contains(concat(' ', normalize-space(@class), ' '), ' notificationsContainer ')]");
-			if(notificationsContainer != null) {
-				foreach(var button in notificationsContainer.SelectNodes("//button") ?? new HtmlNodeCollection(notificationsContainer)) {
-					button.Remove();
-				}
-
-				return notificationsContainer.InnerText.Trim();
-			} else {
-				return null;
-			}
+			var response = await _graphQLHttpClient.SendQueryAsync(new GraphQLRequest {
+				Query = "{ playerCount }"
+			}, () => new { PlayerCount = 0 });
+			return response.Data.PlayerCount;
 		}
 	}
 }

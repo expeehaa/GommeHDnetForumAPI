@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.Models.Entities.Interfaces;
-using GommeHDnetForumAPI.Parser.LiNodeParser;
+using GommeHDnetForumAPI.Parser.NodeListParser;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Models.Entities {
 	public class ForumThread : IndexedEntity, IThread<ForumPost> {
 		public string                 Title    { get; }
-		public IUserInfo              Author   { get; }
+		public UserInfo               Author   { get; }
 		public IEnumerable<ForumPost> Messages { get; private set; }
 		public ThreadPrefix           Prefix   { get; }
 		public SubForum               Parent   { get; }
 		public string                 UrlPath  => $"{ForumPaths.ForumThreadsPath}{Id}/";
 
-		internal ForumThread(Forum forum, long id, string title, IUserInfo author, SubForum parent, ThreadPrefix prefix = null) : base(forum, id) {
+		internal ForumThread(Forum forum, long id, string title, UserInfo author, SubForum parent, ThreadPrefix prefix = null) : base(forum, id) {
 			Title  = title;
 			Author = author;
 			Parent = parent;

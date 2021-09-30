@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GommeHDnetForumAPI.Models.Entities;
-using GommeHDnetForumAPI.Parser.LiNodeParser;
+using GommeHDnetForumAPI.Parser.NodeListParser;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Parser {
@@ -13,7 +13,7 @@ namespace GommeHDnetForumAPI.Parser {
 		}
 
 		public override SubForum Parse(HtmlNode node) {
-			var subforums    = new SubForumLiNodeParser(Forum, _subForum).Parse(node);
+			var subforums    = new SubForumListParser(Forum, _subForum).Parse(node);
 			var titlebarnode = node.SelectSingleNode(".//div[@id='content']/div/div/div[@class='titleBar']");
 			var title        = titlebarnode?.SelectSingleNode("./h1")?.InnerText ?? string.Empty;
 			

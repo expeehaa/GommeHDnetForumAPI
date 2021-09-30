@@ -4,7 +4,7 @@
 	}
 
 	public interface IPost : IUrlPath {
-		IUserInfo Author  { get; }
-		string    Content { get; }
+		UserInfo Author  { get; }
+		string   Content { get; }
 	}
 }

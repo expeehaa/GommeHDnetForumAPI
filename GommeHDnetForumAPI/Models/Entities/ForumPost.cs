@@ -2,7 +2,7 @@
 
 namespace GommeHDnetForumAPI.Models.Entities {
 	public class ForumPost : IndexedEntity, IPost<ForumThread> {
-		public IUserInfo   Author  { get; }
+		public UserInfo    Author  { get; }
 		public string      Content { get; }
 		public ForumThread Parent  { get; }
 		public string      UrlPath => $"{Parent.UrlPath}#post-{Id}";

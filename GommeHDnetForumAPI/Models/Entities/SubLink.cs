@@ -3,17 +3,17 @@
 namespace GommeHDnetForumAPI.Models.Entities {
 	public class SubLink : IndexedEntity, ISubForum {
 		public string Title       { get; }
-		public string Description { get; }
 		public IForum Parent      { get; }
 		public string UrlPath     => $"{ForumPaths.LinkForumsPath}{Id}/";
+		// link-forums do not have (visible) descriptions anymore.
+		public string Description => null;
 
-		internal SubLink(Forum forum, long id, IForum parent, string title, string description) : base(forum, id) {
+		internal SubLink(Forum forum, long id, IForum parent, string title) : base(forum, id) {
 			Title       = title;
-			Description = description;
 			Parent      = parent;
 		}
 
 		public override string ToString()
-			=> $"({Title}({Id}) | {Description})";
+			=> $"({Title}({Id}) | {UrlPath})";
 	}
 }

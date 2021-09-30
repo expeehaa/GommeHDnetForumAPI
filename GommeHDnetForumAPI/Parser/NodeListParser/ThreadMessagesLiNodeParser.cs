@@ -2,8 +2,8 @@
 using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
-namespace GommeHDnetForumAPI.Parser.LiNodeParser {
-	internal class ThreadMessagesLiNodeParser : LiNodeParser<ForumPost, ForumThread> {
+namespace GommeHDnetForumAPI.Parser.NodeListParser {
+	internal class ThreadMessagesLiNodeParser : NodeListParser<ForumPost, ForumThread> {
 		public ThreadMessagesLiNodeParser(Forum forum, ForumThread parent) : base(forum, parent, "//ol[@id='messageList']/li") { }
 
 		protected override ForumPost ParseElement(HtmlNode node) {

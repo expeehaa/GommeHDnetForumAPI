@@ -3,8 +3,8 @@ using System.Text.RegularExpressions;
 using GommeHDnetForumAPI.Models.Entities;
 using HtmlAgilityPack;
 
-namespace GommeHDnetForumAPI.Parser.LiNodeParser {
-	internal class ThreadsLiNodeParser : LiNodeParser<ForumThread, SubForum> {
+namespace GommeHDnetForumAPI.Parser.NodeListParser {
+	internal class ThreadsLiNodeParser : NodeListParser<ForumThread, SubForum> {
 		public ThreadsLiNodeParser(Forum forum, SubForum parent) : base(forum, parent, "//ol[@class='discussionListItems']/li") { }
 
 		protected override ForumThread ParseElement(HtmlNode node) {

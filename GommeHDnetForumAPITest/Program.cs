@@ -13,21 +13,18 @@ namespace GommeHDnetForumAPITest {
 			var forum = new Forum(creds.Username, creds.Password);
 
 			Console.WriteLine(forum.GetOnlineUserCount().GetAwaiter().GetResult());
-			Console.WriteLine(forum.GetNotificationText().GetAwaiter().GetResult());
+			//Console.WriteLine(forum.GetNotificationText().GetAwaiter().GetResult());
 
-			//TestFunctionalities(forum);
+			var selfUser = forum.GetSelfUser().GetAwaiter().GetResult();
+			//TestUserInfoParsing(forum);
+			//AllUserAccountsBeforeId(forum, 20);
+			//TestConversations(forum);
+			//TestConversationWriting(forum);
+			//TestForumThreads(forum);
+			//TestMembersLists(forum);
+			//TestConversationReply(forum);
 
-			Console.ReadKey();
-		}
-
-
-		public static void TestFunctionalities(Forum forum) {
-			TestUserInfoParsing(forum);
-			AllUserAccountsBeforeId(forum, 20);
-			TestConversations(forum);
-			TestForumThreads(forum);
-			TestMembersLists(forum);
-			TestConversationReply(forum);
+			Console.ReadLine();
 		}
 
 		public static void TestUserInfoParsing(Forum forum) {
@@ -51,16 +48,13 @@ namespace GommeHDnetForumAPITest {
 					if(ui?.Verified != null && ui.Verified.Value)
 						userinfos.Add(ui);
 				} catch(Exception e) {
-					text = $"exception: {e.GetType().Name}";
+					text = $"exception: {e}";
 				}
 				Console.WriteLine($"{i}: {text}");
 			}
-			Console.WriteLine("\n\n");
 
-			Console.WriteLine($"Abrufbare und verifizierte Nutzer ({userinfos.Count}):");
-			Console.WriteLine(       string.Join("\n", userinfos.Select(u => $"Id {u.Id,3} | Name {u.Username,-16} | Link {u.UrlPath}").ToArray()));
-			Console.WriteLine($"\n\n{string.Join("\n", userinfos.Select(u => $"Id {u.Id,3} | Name @{u.Username,-16}{(u.TimeRegistered.HasValue ? $" | Registriert seit {u.TimeRegistered.Value}" : "")}").ToArray())}");
-			Console.WriteLine($"\n\n{string.Join("\n", userinfos.Select(u => $"Id {u.Id,3} | Name @{u.Username,-16}").ToArray())}");
+			Console.WriteLine($"\nFound user count: {userinfos.Count}");
+			Console.WriteLine($"{string.Join("\n", userinfos.Select(u => $"Id {u.Id,3} | Name {u.Username,-16} | Link {u.UrlPath}{(u.TimeRegistered.HasValue ? $" | registered since {u.TimeRegistered.Value}" : "")}").ToArray())}");
 		}
 
 		public static void TestConversations(Forum forum) {
@@ -69,21 +63,16 @@ namespace GommeHDnetForumAPITest {
 
 			con1.DownloadMessagesAsync().GetAwaiter().GetResult();
 			Console.WriteLine(con1);
+		}
 
-			var username = Console.ReadLine();
-			var user     = forum.GetUserInfo(username).GetAwaiter().GetResult();
+		public static void TestConversationWriting(Forum forum) {
+			//var con = forum.CreateConversation(new []{"Vinyl_Scratch"}, "test", "i like trains.").GetAwaiter().GetResult();
+			var cons = forum.GetConversations().GetAwaiter().GetResult();
+			var con = cons.FirstOrDefault(c => c.Author.Username == forum.SelfUser.Username && c.Members.Count == 2 && c.Members.Any(m => m.Username == "Vinyl_Scratch"));
 
-			if(user == null) {
-				Console.WriteLine("User not found!");
-			} else {
-				//var con2 = cons.FirstOrDefault(c => c.Title.Equals("test", StringComparison.OrdinalIgnoreCase) && c.Members.Any(m => m.Id == user.Id));
-				//if (con2 == null)
-				//    con2 = forum.CreateConversation(new[] { user }.ToUserCollection(), "test", "A simple test message.").GetAwaiter().GetResult();
-				//else
-				//    con2.Reply("Testantwort").GetAwaiter().GetResult();
+			var replySucceeded = con.Reply("I am also a fan of trains.<br>We should meet some day.").GetAwaiter().GetResult();
 
-				Console.ReadLine();
-			}
+			Console.WriteLine(replySucceeded ? "Reply succeeded." : "Reply failed.");
 		}
 
 		public static void TestForumThreads(Forum forum) {

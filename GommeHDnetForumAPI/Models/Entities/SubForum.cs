@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GommeHDnetForumAPI.Models.Entities.Interfaces;
 using GommeHDnetForumAPI.Parser;
-using GommeHDnetForumAPI.Parser.LiNodeParser;
+using GommeHDnetForumAPI.Parser.NodeListParser;
 using HtmlAgilityPack;
 
 namespace GommeHDnetForumAPI.Models.Entities {

@@ -7,8 +7,8 @@ namespace GommeHDnetForumAPI.Models.Entities.Interfaces {
 	}
 
 	public interface IThread : IUrlPath {
-		string    Title  { get; }
-		IUserInfo Author { get; }
+		string   Title  { get; }
+		UserInfo Author { get; }
 
 		Task DownloadMessagesAsync();
 	}

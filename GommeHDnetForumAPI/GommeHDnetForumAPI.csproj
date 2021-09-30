@@ -22,7 +22,10 @@
 
   <ItemGroup>
     <PackageReference Include="CloudflareSolverRe.Captcha" Version="1.0.6" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.24" />
+    <PackageReference Include="GraphQL.Client" Version="3.2.4" />
+    <PackageReference Include="GraphQL.Client.Abstractions" Version="3.2.4" />
+    <PackageReference Include="GraphQL.Client.Serializer.Newtonsoft" Version="3.2.4" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.37" />
   </ItemGroup>
 
 </Project>
